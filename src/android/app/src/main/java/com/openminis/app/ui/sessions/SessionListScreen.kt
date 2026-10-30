@@ -1056,7 +1056,7 @@ fun SessionListScreen(
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                top = 140.dp,  // [GLASS] 让出整个顶栏高度（96+44）
+                                top = 84.dp,   // [GLASS] 只让出标题区，模糊带与首行重叠（消除顶部大空位）
                                 bottom = 96.dp,
                             ),
                         ) {
@@ -1469,7 +1469,7 @@ fun SessionListScreen(
                 // （Haze 那版在真机上完全没渲染，已弃用）
                 GlassLiquidBar(
                     height = 184.dp,
-                    solidHeight = 96.dp,    // 状态栏 + 标题
+                    solidHeight = 84.dp,    // 状态栏 + 标题：模糊紧贴标题下方开始
                     blurBand = 44.dp,       // 标题下方到原版顶栏底部
                     blurRadius = 45.dp,   // SaltUI 原值
                     refractionHeight = 24.dp,

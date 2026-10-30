@@ -167,7 +167,7 @@ fun UnifiedModelPickerSheet(
 
     ModalBottomSheet(
         containerColor = com.openminis.app.ui.glass.glassSheetColor(),
-        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,  // [GLASS]
+        contentColor = androidx.compose.material3.ChatColors.primaryText,  // [GLASS]
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         // Slim drag handle, same as the main picker / StandardChatSheet — the
@@ -239,7 +239,7 @@ fun UnifiedModelPickerSheet(
                     .height(42.dp),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = ChatColors.primaryText,
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 interactionSource = searchInteraction,
@@ -255,7 +255,7 @@ fun UnifiedModelPickerSheet(
                                 Icons.Default.Search,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = ChatColors.secondaryText,
                             )
                         },
                         trailingIcon = {
@@ -352,7 +352,7 @@ fun UnifiedModelPickerSheet(
                                     else Icons.Default.RadioButtonUnchecked,
                                     contentDescription = null,
                                     tint = if (groupSelected) Color(0xFF34C759)
-                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                    else ChatColors.secondaryText.copy(alpha = 0.3f),
                                     modifier = Modifier.size(22.dp),
                                 )
                                 Spacer(Modifier.width(10.dp))
@@ -384,14 +384,14 @@ fun UnifiedModelPickerSheet(
                                                 Icons.Default.ArrowCircleDown,
                                                 contentDescription = null,
                                                 modifier = Modifier.size(9.dp),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                tint = ChatColors.secondaryText.copy(alpha = 0.7f),
                                             )
                                             Spacer(Modifier.width(2.dp))
                                             Text(
                                                 "FB",
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Medium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                color = ChatColors.secondaryText.copy(alpha = 0.7f),
                                             )
                                         }
                                     }
@@ -409,14 +409,14 @@ fun UnifiedModelPickerSheet(
                                             },
                                         ),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                        color = ChatColors.secondaryText.copy(alpha = 0.5f),
                                     )
                                 }
                                 Box(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .background(
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                            ChatColors.primaryText.copy(alpha = 0.06f),
                                             CircleShape,
                                         )
                                         .clip(CircleShape)
@@ -428,7 +428,7 @@ fun UnifiedModelPickerSheet(
                                         else Icons.Default.KeyboardArrowDown,
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = ChatColors.secondaryText,
                                     )
                                 }
                             }
@@ -528,7 +528,7 @@ fun UnifiedModelPickerSheet(
                         Text(
                             stringResource(R.string.voice_input_picker_group_footer),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = ChatColors.secondaryText,
                             modifier = Modifier.padding(horizontal = 24.dp, vertical = 2.dp),
                         )
                     }
@@ -588,7 +588,7 @@ fun UnifiedModelPickerSheet(
                                         Text(
                                             systemEntrySubtitle(entry),
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            color = ChatColors.secondaryText,
                                         )
                                     }
                                     if (systemInEffect && selectedId == null) {
@@ -638,7 +638,7 @@ fun UnifiedModelPickerSheet(
                                                 Text(
                                                     v.name,
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    color = ChatColors.secondaryText,
                                                 )
                                             }
                                         }
@@ -700,7 +700,7 @@ fun UnifiedModelPickerSheet(
                                     providerName,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = ChatColors.secondaryText,
                                     maxLines = 1,
                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f),
@@ -730,7 +730,7 @@ fun UnifiedModelPickerSheet(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .background(
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                            ChatColors.primaryText.copy(alpha = 0.06f),
                                             CircleShape,
                                         )
                                         .clip(CircleShape)
@@ -746,7 +746,7 @@ fun UnifiedModelPickerSheet(
                                         else Icons.Default.KeyboardArrowUp,
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = ChatColors.secondaryText,
                                     )
                                 }
                             }
@@ -809,7 +809,7 @@ fun UnifiedModelPickerSheet(
                                                     Text(
                                                         entry.baseModel.id,
                                                         style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        color = ChatColors.secondaryText,
                                                     )
                                                 },
                                                 tags = { badges.forEach { badge -> ModalityBadge(badge) } },
@@ -861,7 +861,7 @@ private fun PickerSectionHeader(
             label,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = ChatColors.secondaryText,
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 16.dp, top = 14.dp, bottom = 6.dp),
@@ -876,7 +876,7 @@ private fun SelectionMark(selected: Boolean) {
         if (selected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
         contentDescription = null,
         tint = if (selected) Color(0xFF007AFF)
-        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+        else ChatColors.secondaryText.copy(alpha = 0.3f),
         modifier = Modifier.size(20.dp),
     )
 }

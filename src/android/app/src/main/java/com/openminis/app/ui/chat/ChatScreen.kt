@@ -3870,7 +3870,7 @@ fun ChatScreen(
                         contentPadding = PaddingValues(
                             // [GLASS] 顶栏改由浮层绘制后，Scaffold 不再为它留位置；
                             // 列表自己让出这段高度，滚动时才从玻璃下面穿过。
-                            top = 124.dp,
+                            top = 118.dp,
                             bottom = if (bottomReserve == 0.dp) 12.dp else bottomReserve,
                         ),
                         modifier = Modifier
@@ -5578,10 +5578,6 @@ fun ChatScreen(
                             .drawBackdrop(
                                 backdrop = composerBackdrop,
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
-                                // [GLASS] 采样区上移：输入卡脚下的区域常常是空的（列表内容让位），
-                                // 直接采样只会糊到一片底色。把采样窗口往上移，采到的就是
-                                // 紧贴它上方的消息内容 —— 视觉上等同于"内容从玻璃后流过"。
-                                layerBlock = { translationY = -120f },
                                 effects = {
                                     vibrancy()
                                     blur(18.dp.toPx())          // 加大模糊，输入卡才看得出"透过玻璃"
@@ -7496,7 +7492,7 @@ fun ChatScreen(
             glass = {
                 GlassLiquidBar(
                     height = 196.dp,
-                    solidHeight = 96.dp,      // 状态栏 + 标题（红线以上，不糊）
+                    solidHeight = 84.dp,      // 状态栏 + 标题：标题本身不糊，模糊紧贴其下开始
                     blurBand = 56.dp,         // 红线以下到原版顶栏底部：只这里糊
                     blurRadius = 45.dp,       // SaltUI blurryGlass 的原值
                     refractionHeight = 24.dp,

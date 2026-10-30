@@ -484,7 +484,7 @@ internal fun ModelPickerSheet(
                     .height(42.dp),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = ChatColors.primaryText,
                 ),
                 cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                 interactionSource = searchInteraction,
@@ -500,7 +500,7 @@ internal fun ModelPickerSheet(
                                 Icons.Default.Search,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = ChatColors.secondaryText,
                             )
                         },
                         trailingIcon = {
@@ -623,7 +623,7 @@ internal fun ModelPickerSheet(
                                     // SemiBold puts it a step above.
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = ChatColors.secondaryText,
                                     modifier = Modifier
                                         .weight(1f)
                                         .padding(start = 16.dp, top = 14.dp, bottom = 6.dp),
@@ -692,7 +692,7 @@ internal fun ModelPickerSheet(
                                         if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                         contentDescription = null,
                                         tint = if (isSelected) Color(0xFF34C759)
-                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                        else ChatColors.secondaryText.copy(alpha = 0.3f),
                                         modifier = Modifier.size(22.dp),
                                     )
                                     Spacer(Modifier.width(10.dp))
@@ -735,14 +735,14 @@ internal fun ModelPickerSheet(
                                                     else Icons.Default.AccountTree,
                                                     contentDescription = null,
                                                     modifier = Modifier.size(9.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                    tint = ChatColors.secondaryText.copy(alpha = 0.7f),
                                                 )
                                                 Spacer(Modifier.width(2.dp))
                                                 Text(
                                                     strategyLabel,
                                                     fontSize = 9.sp,
                                                     fontWeight = FontWeight.Medium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                    color = ChatColors.secondaryText.copy(alpha = 0.7f),
                                                 )
                                             }
                                         }
@@ -751,19 +751,19 @@ internal fun ModelPickerSheet(
                                             Text(
                                                 "→ ${resolvedEntry.model.displayName}",
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                color = ChatColors.secondaryText.copy(alpha = 0.6f),
                                             )
                                         } else if (resolvedCount > 0) {
                                             Text(
                                                 pluralStringResource(R.plurals.model_picker_models_count, resolvedCount, resolvedCount),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                color = ChatColors.secondaryText.copy(alpha = 0.5f),
                                             )
                                         } else {
                                             Text(
                                                 stringResource(R.string.model_picker_models_count_unlinked, group.memberEntryIds.size),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                                color = ChatColors.secondaryText.copy(alpha = 0.4f),
                                             )
                                         }
                                     }
@@ -822,7 +822,7 @@ internal fun ModelPickerSheet(
                                         modifier = Modifier
                                             .size(24.dp)
                                             .background(
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                                ChatColors.primaryText.copy(alpha = 0.06f),
                                                 CircleShape,
                                             )
                                             .clip(CircleShape)
@@ -839,7 +839,7 @@ internal fun ModelPickerSheet(
                                             if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                             contentDescription = null,
                                             modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = ChatColors.secondaryText,
                                         )
                                     }
                                 }
@@ -861,7 +861,7 @@ internal fun ModelPickerSheet(
                                         Text(
                                             stringResource(R.string.model_picker_no_linked_models),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                            color = ChatColors.secondaryText.copy(alpha = 0.5f),
                                             modifier = Modifier.padding(start = 48.dp, top = 4.dp, bottom = 8.dp),
                                         )
                                     }
@@ -899,7 +899,7 @@ internal fun ModelPickerSheet(
                                                     if (isActive) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                                     contentDescription = null,
                                                     tint = if (isActive) Color(0xFF007AFF)
-                                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                                                    else ChatColors.secondaryText.copy(alpha = 0.2f),
                                                     modifier = Modifier.size(17.dp),
                                                 )
                                                 Spacer(Modifier.width(10.dp))
@@ -933,18 +933,18 @@ internal fun ModelPickerSheet(
                                                                 instance.label.ifEmpty { instance.providerType.displayName },
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 fontWeight = FontWeight.Medium,
-                                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                                color = ChatColors.secondaryText.copy(alpha = 0.7f),
                                                             )
                                                             Text(
                                                                 " · ",
                                                                 style = MaterialTheme.typography.labelSmall,
-                                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                                                color = ChatColors.secondaryText.copy(alpha = 0.4f),
                                                             )
                                                         }
                                                         Text(
                                                             entry.model.id,
                                                             style = MaterialTheme.typography.labelSmall,
-                                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                                            color = ChatColors.secondaryText.copy(alpha = 0.4f),
                                                         )
                                                     }
                                                 }
@@ -970,7 +970,7 @@ internal fun ModelPickerSheet(
                             Text(
                                 stringResource(R.string.model_picker_groups_footer),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                color = ChatColors.secondaryText.copy(alpha = 0.5f),
                                 // T236: hint sits between Model Groups card and
                                 // first Provider card — top 8 hugs the group
                                 // card, bottom 12 separates from the next card.
@@ -1028,7 +1028,7 @@ internal fun ModelPickerSheet(
                                             // header above — see that comment.
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            color = ChatColors.secondaryText,
                                             // [T-android-picker-provider-edit] One
                                             // line, so a long name cannot push the
                                             // two buttons off the row.
@@ -1079,7 +1079,7 @@ internal fun ModelPickerSheet(
                                         modifier = Modifier
                                             .size(24.dp)
                                             .background(
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                                ChatColors.primaryText.copy(alpha = 0.06f),
                                                 CircleShape,
                                             )
                                             .clip(CircleShape)
@@ -1096,7 +1096,7 @@ internal fun ModelPickerSheet(
                                             if (isCollapsed) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
                                             contentDescription = null,
                                             modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = ChatColors.secondaryText,
                                         )
                                     }
                                 }
@@ -1135,7 +1135,7 @@ internal fun ModelPickerSheet(
                                                 if (selectedEntry != null) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                                 contentDescription = null,
                                                 tint = if (selectedEntry != null) Color(0xFF007AFF)
-                                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                                else ChatColors.secondaryText.copy(alpha = 0.3f),
                                                 modifier = Modifier.size(20.dp),
                                             )
                                             Spacer(Modifier.width(10.dp))
@@ -1267,7 +1267,7 @@ internal fun ModelPickerSheet(
                                                 if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                                                 contentDescription = null,
                                                 tint = if (isSelected) Color(0xFF007AFF)
-                                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                                else ChatColors.secondaryText.copy(alpha = 0.3f),
                                                 modifier = Modifier.size(20.dp),
                                             )
                                             Spacer(Modifier.width(10.dp))
@@ -1305,7 +1305,7 @@ internal fun ModelPickerSheet(
                         Text(
                             stringResource(R.string.model_picker_search_capped, r.shown, r.totalMatches),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = ChatColors.secondaryText,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1327,20 +1327,20 @@ internal fun ModelPickerSheet(
                                 if (searchText.isNotEmpty()) Icons.Default.Search else Icons.Default.Memory,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                tint = ChatColors.secondaryText.copy(alpha = 0.3f),
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
                                 stringResource(if (searchText.isNotEmpty()) R.string.model_picker_no_results else R.string.model_picker_no_models),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = ChatColors.secondaryText,
                             )
                             if (searchText.isEmpty()) {
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     stringResource(R.string.model_picker_configure_hint),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    color = ChatColors.secondaryText.copy(alpha = 0.6f),
                                     textAlign = TextAlign.Center,
                                 )
                             } else {
@@ -1348,7 +1348,7 @@ internal fun ModelPickerSheet(
                                 Text(
                                     stringResource(R.string.model_picker_try_different_search),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    color = ChatColors.secondaryText.copy(alpha = 0.5f),
                                 )
                             }
                         }
@@ -1466,7 +1466,7 @@ private fun ProviderEntryRowText(
                 Text(
                     entry.model.id,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    color = ChatColors.secondaryText.copy(alpha = 0.5f),
                 )
             },
             tags = {

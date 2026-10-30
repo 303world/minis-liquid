@@ -2,6 +2,8 @@ package app.minis.glass
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +38,8 @@ import app.minis.glass.token.GlassTokens
 fun GlassLiquidBar(
     modifier: Modifier = Modifier,
     height: Dp = 140.dp,
+    /** 模糊带高度：只覆盖标题**下方**这一条，标题本身保持清晰（可读性关键）。 */
+    blurBand: Dp = 84.dp,
     /** 模糊半径。参考库的条只用 8dp —— 半径一大内容就糊成一团。 */
     blurRadius: Dp = 8.dp,
     refractionHeight: Dp = 24.dp,
@@ -51,7 +55,11 @@ fun GlassLiquidBar(
         if (backdrop != null && quality != GlassQuality.Off) {
             Box(
                 Modifier
-                    .matchParentSize()
+                    // [GLASS] 关键：玻璃只画在标题下方的一条带子里，而不是整块顶栏。
+                    // 椒盐音乐的可读性来自这一点 —— 标题所在的区域本身不糊。
+                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(blurBand)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawBackdrop(
                         backdrop = backdrop,
@@ -85,10 +93,11 @@ fun GlassLiquidBar(
                     .drawWithContent {
                         drawContent()
                         // 垂直渐隐：只遮玻璃层，不影响顶栏文字
+                        // 带内：上实下虚，1 → 0
                         drawRect(
                             brush = Brush.verticalGradient(
                                 0f to Color.Black,
-                                solidFraction.coerceIn(0.05f, 0.95f) to Color.Black,
+                                0.35f to Color.Black.copy(alpha = 0.75f),
                                 1f to Color.Transparent,
                             ),
                             blendMode = BlendMode.DstIn,

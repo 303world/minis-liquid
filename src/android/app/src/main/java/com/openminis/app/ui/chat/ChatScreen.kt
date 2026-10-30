@@ -5575,6 +5575,9 @@ fun ChatScreen(
                             // [GLASS] 输入卡 = 液态玻璃：采样背后的消息列表 + 折射 + 高光。
                             // 上游这张卡是纯自绘（drawBehind 画底色+阴影），这里把底色交给玻璃，
                             // drawBehind 只保留阴影。
+                            // clip 必须在 drawBackdrop **之前**：这样玻璃按 20dp 圆角裁剪，
+                            // 否则 onDrawSurface 的 drawRect 会画出一块直边矩形背板。
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
                             .drawBackdrop(
                                 backdrop = composerBackdrop,
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },

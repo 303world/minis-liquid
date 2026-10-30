@@ -104,7 +104,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
-import app.minis.glass.GlassFadeBar
+import app.minis.glass.GlassProgressiveBar
 import app.minis.glass.token.GlassTokens
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
@@ -1452,11 +1452,13 @@ fun SessionListScreen(
             }
             },
             glass = {
-                // [GLASS] 用"渐变模糊"而不是整条均匀玻璃：浅色内容上均匀模糊看不出来，
-                // 只有越往上越糊、往下消散，才有 iOS / SaltUI 那种顶栏观感。
-                GlassFadeBar(
-                    height = 104.dp,
-                    blurRadius = 24.dp,
+                // [GLASS] 渐进模糊顶栏：参数照抄 SaltUI（Haze, blur 45dp, tint 0x80FFFFFF,
+                // 垂直 1→0 渐隐）。之前的均匀模糊在白底上看不出任何区别。
+                GlassProgressiveBar(
+                    hazeState = app.minis.glass.LocalHazeState.current,
+                    height = 132.dp,
+                    blurRadius = 45.dp,
+                    dark = isDark,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(

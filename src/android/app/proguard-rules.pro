@@ -26,3 +26,12 @@
 # NOTE FOR VERIFICATION: debug builds don't minify, so this bug is invisible
 # there. Any change here must be checked against an assembleRelease APK.
 -keep class io.codeconcept.realtimecutvadlibrary.** { *; }
+
+# [GLASS] rclone.aar 是从官方 APK 的 classes.dex 里还原出来的（上游不提交该构建产物）。
+# dex2jar 只保留了实际引用的两个包（com.openminis.rclone.gomobile / go），
+# gomobile 运行时里个别内部类（如 S.a）不在其中，R8 会把"引用了缺失的类"当成错误。
+# 这些类只在 Go 侧通过 JNI 用到，Java 侧不会实例化，放行即可。
+-dontwarn go.**
+-dontwarn S.**
+-keep class go.** { *; }
+-keep class com.openminis.rclone.gomobile.** { *; }

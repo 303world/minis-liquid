@@ -2120,7 +2120,12 @@ private fun SelectionToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
+            // [GLASS] 多选工具条：轻量玻璃（半透明 + 发丝边），浮在列表上不采样
+            .background(
+                if (ChatColors.isDark) Color.White.copy(alpha = 0.08f)
+                else Color.White.copy(alpha = 0.80f),
+            )
+            .border(0.5.dp, Color.White.copy(alpha = if (ChatColors.isDark) 0.14f else 0.9f))
             .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {

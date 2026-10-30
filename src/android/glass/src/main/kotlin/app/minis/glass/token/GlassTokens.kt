@@ -50,6 +50,9 @@ object GlassTokens {
         blurRadius = 2.dp,
         refractionHeight = 12.dp,
         refractionAmount = 24.dp,
+        // [GLASS] 圆形玻璃上不要高光：Highlight 走的是低分段的路径，
+        // 在 56dp 圆钮上会画出一个明显的八边形（真机已复现）。
+        highlight = null,
     )
 
     /** 面板 / 卡片 —— 无折射。 */

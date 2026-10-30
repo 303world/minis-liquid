@@ -61,10 +61,14 @@ fun MinisAlertDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true),
     ) {
+        // [GLASS] 独立窗口采样不到页面内容：用系统级背景模糊 + 半透明底 + 渐变发丝边，
+        // 观感对齐 iOS 的玻璃弹窗。
+        com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
         Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(20.dp),
+            color = com.openminis.app.ui.glass.glassSheetColor(),
+            border = com.openminis.app.ui.glass.glassSheetBorder(),
+            tonalElevation = 0.dp,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(

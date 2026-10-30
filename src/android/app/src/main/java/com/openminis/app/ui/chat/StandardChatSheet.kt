@@ -74,10 +74,10 @@ fun StandardChatSheet(
     val sheetHeight = (configuration.screenHeightDp * heightFraction.coerceIn(0.1f, 1f)).dp
 
     ModalBottomSheet(
-        containerColor = com.openminis.app.ui.glass.glassSheetColor(),  // [GLASS]
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = ChatColors.background,
+        // [GLASS] 半透明容器（配合系统背景模糊）
+        containerColor = com.openminis.app.ui.glass.glassSheetColor(),
         dragHandle = { CompactDragHandle() },
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = onBack == null),
     ) {

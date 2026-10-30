@@ -205,6 +205,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.draw.clip
 import app.minis.glass.GlassLiquidBar
+import app.minis.glass.effects.blur
+import app.minis.glass.effects.lens
+import app.minis.glass.effects.vibrancy
 import app.minis.glass.drawBackdrop
 import app.minis.glass.backdrops.layerBackdrop
 import com.openminis.app.ui.glass.GlassWallpaper
@@ -5573,9 +5576,9 @@ fun ChatScreen(
                                 backdrop = composerBackdrop,
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
                                 effects = {
-                                    app.minis.glass.effects.vibrancy()
-                                    app.minis.glass.effects.blur(8.dp.toPx())
-                                    app.minis.glass.effects.lens(24.dp.toPx(), 24.dp.toPx())
+                                    vibrancy()
+                                    blur(8.dp.toPx())
+                                    lens(24.dp.toPx(), 24.dp.toPx())
                                 },
                                 onDrawSurface = {
                                     drawRect(

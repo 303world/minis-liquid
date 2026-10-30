@@ -178,8 +178,6 @@ fun UnifiedModelPickerSheet(
                     .padding(top = 6.dp, bottom = 4.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
-                // [GLASS] 独立窗口：系统级背景模糊
-                com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
                 Box(
                     modifier = Modifier
                         .width(32.dp)
@@ -192,6 +190,8 @@ fun UnifiedModelPickerSheet(
             }
         },
     ) {
+        // [GLASS] 独立窗口：系统级背景模糊
+        com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
         // 0.9f fixed height + nav-bar inset, exactly like the main picker —
         // a content-wrapping column here let the voice pickers (whose provider
         // sections seed expanded) grow to cover the full screen.

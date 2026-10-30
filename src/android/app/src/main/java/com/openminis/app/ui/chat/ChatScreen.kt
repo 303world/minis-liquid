@@ -7481,10 +7481,6 @@ fun ChatScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(
-                        // [GLASS] 顶栏自身不能刷底色，否则玻璃被盖住
-                        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                        ),
                         title = {
                             // iOS-style centered layout: "Minis" + group row + provider·model row
                             Box(
@@ -8244,9 +8240,10 @@ fun ChatScreen(
                             }
                         },
                         windowInsets = WindowInsets.statusBars,
+                        // [GLASS] 顶栏不刷底色，否则把玻璃盖住
                         colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                            containerColor = ChatColors.background.copy(alpha = 0.92f),
-                            scrolledContainerColor = ChatColors.background.copy(alpha = 0.92f),
+                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                            scrolledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
                         ),
                         // [T-android-topbar-shrink] 76dp → 68dp. The earlier
                         // T-topbar-model-row-clip fix bumped 60dp → 76dp to give the

@@ -31,3 +31,5 @@ rootProject.name = "Minis"
 // [GLASS] 液态玻璃渲染内核
 include(":glass")
 include(":app")
+// [GLASS] 玻璃效果独立演示 App
+include(":glassdemo")

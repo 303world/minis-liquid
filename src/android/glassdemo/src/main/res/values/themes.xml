@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 演示 App 不需要系统 ActionBar，全部交给 Compose 画。 -->
+    <style name="Theme.GlassDemo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

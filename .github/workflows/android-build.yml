@@ -109,6 +109,15 @@ jobs:
             -Dorg.gradle.jvmargs='-Xmx5g -Dfile.encoding=UTF-8' \
             --stacktrace --console=plain
 
+      # 玻璃演示 App（独立包名 app.minis.glassdemo），用来肉眼判断玻璃像不像 iOS。
+      - name: Assemble glass demo
+        working-directory: src/android
+        run: |
+          ./gradlew :glassdemo:assembleDebug \
+            -Pkotlin.daemon.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g' \
+            -Dorg.gradle.jvmargs='-Xmx4g -Dfile.encoding=UTF-8' \
+            --console=plain
+
       - name: Verify APK identity
         working-directory: src/android
         run: |
@@ -125,6 +134,7 @@ jobs:
           name: minis-liquid-apk
           path: |
             src/android/app/build/outputs/apk/github/**/*.apk
+            src/android/glassdemo/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -144,6 +154,7 @@ jobs:
             本构建为开发预览：界面尚未开始玻璃化改造（M0 阶段，功能与上游一致）。
           files: |
             src/android/app/build/outputs/apk/github/**/*.apk
+            src/android/glassdemo/build/outputs/apk/debug/*.apk
           draft: false
           prerelease: false
           fail_on_unmatched_files: true

@@ -400,7 +400,13 @@ fun SettingsScreen(
     }
 
     if (showFeedbackSheet) {
-        ModalBottomSheet(onDismissRequest = { showFeedbackSheet = false }) {
+        ModalBottomSheet(
+            onDismissRequest = { showFeedbackSheet = false },
+            // [GLASS] 反馈弹窗同样玻璃化
+            containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ) {
+            com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
             Column(modifier = Modifier.padding(bottom = 24.dp)) {
                 FeedbackSheetItem(
                     icon = Icons.Outlined.BugReport,

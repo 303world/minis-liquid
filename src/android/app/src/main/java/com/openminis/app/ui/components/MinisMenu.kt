@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.openminis.app.ui.glass.ApplyWindowBackgroundBlur
 import com.openminis.app.ui.theme.ChatColors
 
 /**
@@ -72,7 +73,9 @@ fun MinisMenu(
     // in dark, a subtle shade in light) so the menu pops out — same fix already
     // validated on the text-selection toolbar (T-android-text-toolbar-dark-
     // visibility). The dark-mode `border` below adds the extra edge definition.
-    containerColor: Color = if (ChatColors.isDark) MaterialTheme.colorScheme.surfaceContainerHigh else Color.White,
+    // [GLASS] 半透明底色：菜单是独立窗口，真正的"玻璃"靠系统背景模糊
+    // （ApplyWindowBackgroundBlur）+ 这层淡色 + 发丝描边叠出来。
+    containerColor: Color = if (ChatColors.isDark) Color(0xE61C1C1E) else Color(0xE6FFFFFF),
     tonalElevation: Dp = 3.dp,
     // [T-android-menu-shadow-clip] Surface's own shadow, capped at
     // [MinisMenuPosition.MAX_POPUP_SHADOW_ELEVATION] (8dp).
@@ -140,6 +143,8 @@ fun MinisMenu(
             }
         },
     ) {
+        // [GLASS] 让系统在这个窗口后面做实时模糊（API 31+）；不支持时安静跳过。
+        ApplyWindowBackgroundBlur(radiusPx = 48)
         // [T-android-menu-screen-margin] The popup's constraints are the
         // window; cap the menu at the window height minus both vertical
         // margins so a long menu still fits inside the margins and scrolls

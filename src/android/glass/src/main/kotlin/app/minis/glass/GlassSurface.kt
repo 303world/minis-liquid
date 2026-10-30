@@ -1,6 +1,7 @@
 package app.minis.glass
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -59,9 +61,19 @@ fun GlassSurface(
     val glassModifier =
         if (backdrop == null || quality == GlassQuality.Off) {
             // 退化路径：中性半透明底（明暗各一套），观感接近上游的卡片。
+            // [GLASS] 没有 backdrop 时的退化路径：半透明底 + 0.5dp 发丝描边 + 投影。
+            // 这条路径服务于菜单/弹窗这类"独立窗口"——它们采样不到页面内容，
+            // 靠系统背景模糊（见 GlassWindowBlur）出效果；模糊不可用时至少还有
+            // 描边和投影撑住"一块浮起来的玻璃"的观感。
             val fallback =
-                if (isDark) Color.Black.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.10f)
-            modifier.background(fallback, shape).clip(shape)
+                if (isDark) Color.Black.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.72f)
+            val hairline =
+                if (isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.06f)
+            modifier
+                .shadow(elevation = 18.dp, shape = shape, clip = false)
+                .background(fallback, shape)
+                .border(0.5.dp, hairline, shape)
+                .clip(shape)
         } else {
             modifier
                 .drawBackdrop(

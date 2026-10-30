@@ -2078,12 +2078,13 @@ private fun DualFabRow(
                 // surface above the list. Also drop both border colors —
                 // capsule shape with no outline reads more like iOS's filled
                 // search bar than the M3 outlined field default.
-                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    focusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                ),
+                // [GLASS] 搜索胶囊：轻量玻璃（半透明 + 发丝边），纯色底场景不采样、不模糊
+                                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = if (isDark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.70f),
+                                    unfocusedContainerColor = if (isDark) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.62f),
+                                    focusedBorderColor = Color.White.copy(alpha = if (isDark) 0.22f else 0.95f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = if (isDark) 0.14f else 0.80f),
+                                ),
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 10.dp)

@@ -181,17 +181,7 @@ fun CheckUpdateSection() {
                 }
             },
         )
-        // [T-update-channels] Channel: stable (default) or beta (asks first).
-        SettingsRow(
-            icon = Icons.Outlined.Science,
-            iconColor = Color(0xFFFF9500),
-            title = stringResource(R.string.update_channel_title),
-            subtitle = stringResource(
-                if (channel == UpdatePolicy.Channel.BETA) R.string.update_channel_beta else R.string.update_channel_stable,
-            ),
-            showDivider = BuildConfig.AUTO_UPDATE_CHECK,
-            onClick = { showChannelPicker = true },
-        )
+        // [GLASS] 本 fork 只有一个更新渠道，去掉 stable/beta 选择项。
         // Automatic checks: a github-build setting; a store build never checks
         // on its own, so it has nothing to switch.
         if (BuildConfig.AUTO_UPDATE_CHECK) {

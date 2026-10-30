@@ -5580,15 +5580,16 @@ fun ChatScreen(
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
                                 effects = {
                                     vibrancy()
-                                    blur(10.dp.toPx())
+                                    blur(18.dp.toPx())          // 加大模糊，输入卡才看得出"透过玻璃"
                                     lens(24.dp.toPx(), 24.dp.toPx())
                                 },
                                 onDrawSurface = {
                                     drawRect(
+                                        // 染色要轻：白色一大就把背后的模糊盖成"纯色卡片"
                                         if (composerGlassDark) {
-                                            Color.Black.copy(alpha = 0.16f)
+                                            Color.Black.copy(alpha = 0.10f)
                                         } else {
-                                            Color.White.copy(alpha = 0.22f)
+                                            Color.White.copy(alpha = 0.12f)
                                         },
                                     )
                                 },

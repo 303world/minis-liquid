@@ -84,6 +84,13 @@ jobs:
              src/android/app/provider-customization.properties
           echo "sdk.dir=$ANDROID_HOME" > src/android/local.properties
 
+      # 上游 APK（42MB）+ dex2jar 每次都重新下载很浪费时间，缓存住。
+      - name: Cache upstream artifacts
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: glass-upstream-${{ inputs.upstream_version || '1.15' }}
+
       - name: Fetch prebuilt native libs + sandbox assets from upstream APK
         run: bash scripts/glass/fetch-prebuilt-native.sh "${{ inputs.upstream_version || '1.15' }}"
 

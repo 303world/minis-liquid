@@ -34,9 +34,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-        // 上游 internal/LayerRecorder.kt 用了 context receivers（context(node: DelegatableNode)）
-        // 把 DelegatableNode 隐式带进 DrawScope.recordLayer。这是实验特性，需要显式开启。
-        freeCompilerArgs += listOf("-Xcontext-receivers")
     }
 
     buildFeatures {

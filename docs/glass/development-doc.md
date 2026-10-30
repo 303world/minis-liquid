@@ -538,13 +538,21 @@ fun GlassBackdropHost(
 
 ## 6. 构建、签名与发布
 
-### 6.1 三条构建路径（按用途分工）
+### 6.1 构建路径（2026-10-30 决策变更：本机零构建）
 
-| 路径 | 主机 | 用途 | 耗时（实测/估算） | 原生库 |
+> **教训**：最初把「手机内构建」当作日常迭代路径，实测跑一次 `compileGithubDebugKotlin` 就把手机推到 12GB 内存占用、持续 CPU 满载、机身明显发热，第四次尝试时 Kotlin 守护进程被 OOM 杀掉、手机可用内存掉到 370MB。**这个方案作废。**
+> 29 万行 Kotlin + KSP + Compose 编译器不是手机该干的活。本机从此只做「编辑 + 静态检查（rg/git）+ 读日志」，任何 Gradle 任务都不在设备上跑。
+
+| 路径 | 主机 | 用途 | 耗时 | 状态 |
 |---|---|---|---|---|
-| **A. 本机预编译** | 手机内 PRoot Alpine aarch64（本机） | 日常 UI 迭代、编译验证、装到手机上看效果 | 首次 25~40 分钟（下载依赖），增量 3~8 分钟（估） | 复用官方 APK 抽出的 .so |
-| **B. 桌面完整** | x86_64 Linux/macOS + NDK 27 | 正式回归、出可发布包 | 40~60 分钟（含 native 编译） | 源码编译 |
-| **C. GitHub Actions** | ubuntu-latest | 发布、给别人下载 | 45~70 分钟 | 源码编译 |
+| **A. GitHub Actions（唯一主路径）** | ubuntu-latest（4 vCPU / 16GB） | 所有构建与出包 | 首次 ~60~70 分钟，后续带缓存 ~25~35 分钟 | ✅ 采用 |
+| B. 桌面完整构建 | 主人自己的 x86_64 电脑 + NDK 27 | 需要快速迭代时的可选项 | 20~40 分钟 | 可选，不强求 |
+| ~~C. 手机内构建~~ | ~~PRoot aarch64~~ | ~~日常迭代~~ | — | ❌ **已废弃**（发热/内存/OOM，且 aapt2 还得靠 qemu 模拟） |
+
+**由此带来的节奏变化（必须接受）**：每次代码改动 → push → CI 出包 → 下载安装，一轮 ≈ 30~60 分钟。所以：
+- 一次改一批（不是改一行看一次）；
+- 可调参数全部集中到 `GlassTokens`，一次调多个值；
+- 每轮交付都附「预期看什么」，减少无效往返。
 
 **A 的前提**（已验证并落地）：
 1. `ANDROID_HOME=/opt/android-sdk`（含 platform-36、build-tools 36、cmdline-tools）、JDK 17、Gradle 8.11.1（wrapper 会自取）。
@@ -558,7 +566,7 @@ fun GlassBackdropHost(
 - APK 只能自签，且与官方签名不同（不能覆盖安装）。
 - 打包 45MB 的 `libgojni.so` + 18MB `libonnxruntime.so` 时 I/O 压力大，`assemble` 比 `compile` 慢很多；日常用 `compile` 验证，出包才 `assemble`。
 
-### 6.1.1 已验证的第一个真实阻塞：`rclone.aar` 不存在
+### 6.1.1 `rclone.aar` 不存在（已在本地解决，CI 侧仍需决策）
 
 **现象**（本机实测）：
 ```
@@ -571,7 +579,7 @@ Execution failed for task ':app:checkGithubDebugAarMetadata'.
 
 **原因**：`app/build.gradle.kts:448` 依赖 `flatDir("app/libs")` 里的 `rclone.aar`；该文件是 `deps/build_rclone_android.sh` 的产物（Go + gomobile + NDK 交叉编译），**上游不提交**。也就是说：**任何干净 clone 都编不出 APK，必须先把 Go 原生依赖编出来**。这跟「手机内能不能编 Kotlin」是两件事 —— Kotlin 编译本身还没开始就被这个依赖卡住了。
 
-**三条解法**（按推荐顺序）：
+**三条解法**（本机已用 S1 解决并验证产物可用；CI 可继续用 S1 省 10 分钟，也可用 S2 从源码编）：
 
 | 方案 | 做法 | 优点 | 缺点 |
 |---|---|---|---|

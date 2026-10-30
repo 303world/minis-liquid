@@ -140,7 +140,7 @@ private fun DemoFeed(dark: Boolean) {
 private fun TopBar(quality: GlassQuality) {
     Box(Modifier.fillMaxWidth().systemBarsPadding().padding(16.dp)) {
         GlassSurface(
-            level = GlassTokens.bar(isDark = false),
+            level = GlassTokens.Bar,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
@@ -169,9 +169,8 @@ private fun BoxScope.BottomControls(
     ) {
         // 圆形玻璃按钮（FAB 的形态），品牌沙色 tint —— 对应 iOS 新建会话按钮
         GlassSurface(
-            level = GlassTokens.bar(dark).copy(
-                tint = (if (dark) GlassTokens.BrandSandDark else GlassTokens.BrandSand)
-                    .copy(alpha = 0.30f),
+            level = GlassTokens.Button.copy(
+                tint = if (dark) GlassTokens.BrandSandDark else GlassTokens.BrandSand,
             ),
             shape = CircleShape,
             modifier = Modifier.size(56.dp).clickable { onToggleDark() },
@@ -183,7 +182,7 @@ private fun BoxScope.BottomControls(
         Spacer(Modifier.height(12.dp))
         // 底部工具条
         GlassSurface(
-            level = GlassTokens.bar(dark),
+            level = GlassTokens.Bar,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth().height(60.dp),
         ) {

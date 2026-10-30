@@ -205,6 +205,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.draw.clip
 import app.minis.glass.GlassLiquidBar
+import app.minis.glass.drawBackdrop
+import app.minis.glass.backdrops.layerBackdrop
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
 import androidx.compose.ui.draw.drawBehind
@@ -2990,6 +2992,9 @@ fun ChatScreen(
             content = {
             // [GLASS] 极淡层叠渐变，给玻璃提供可采样的色温（正常阅读时察觉不到）
             GlassWallpaper()
+            // [GLASS] 局部 backdrop：输入框浮在消息列表上方，要采样"背后的消息"，
+            // 不能用页面级 backdrop（那份里含输入框自己，会糊到自己）。
+            val composerBackdrop = app.minis.glass.backdrops.rememberLayerBackdrop()
             // [T-android-scroll-fab-content-inset] The chat pane's own width, used
             // below to inset the scroll buttons to the capped content column.
             var chatPaneWidthPx by remember { mutableStateOf(0) }
@@ -3867,6 +3872,8 @@ fun ChatScreen(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
+                            // [GLASS] 录进局部 backdrop，供输入框采样
+                            .layerBackdrop(composerBackdrop)
                             // [T-android-session-entering-dots] Fades the first
                             // rows in under the leaving dots; 1f at all other times.
                             .graphicsLayer { alpha = listEntryAlpha }
@@ -5441,7 +5448,8 @@ fun ChatScreen(
                     val inputBgArgb = ChatColors.inputBg.toArgb()
                     val shadowPaint = remember(inputBgArgb) {
                         android.graphics.Paint().apply {
-                            color = inputBgArgb
+                            // [GLASS] 只画阴影，不画底色 —— 底色由 GlassSurface 提供
+                            color = android.graphics.Color.TRANSPARENT
                             isAntiAlias = true
                         }
                     }
@@ -5558,6 +5566,27 @@ fun ChatScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            // [GLASS] 输入卡 = 液态玻璃：采样背后的消息列表 + 折射 + 高光。
+                            // 上游这张卡是纯自绘（drawBehind 画底色+阴影），这里把底色交给玻璃，
+                            // drawBehind 只保留阴影。
+                            .drawBackdrop(
+                                backdrop = composerBackdrop,
+                                shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
+                                effects = {
+                                    app.minis.glass.effects.vibrancy()
+                                    app.minis.glass.effects.blur(8.dp.toPx())
+                                    app.minis.glass.effects.lens(24.dp.toPx(), 24.dp.toPx())
+                                },
+                                onDrawSurface = {
+                                    drawRect(
+                                        if (com.openminis.app.ui.theme.ChatColors.isDark) {
+                                            Color.Black.copy(alpha = 0.12f)
+                                        } else {
+                                            Color.White.copy(alpha = 0.14f)
+                                        },
+                                    )
+                                },
+                            )
                             // [T-in-chat-search] Hidden while searching but kept in
                             // the layout (iOS ChatSearchComposerHider), so the list's
                             // bottom inset does not jump; no touches, no a11y.

@@ -2556,7 +2556,6 @@ private fun folderEdgeColor(): Color =
 @Composable
 // [GLASS] 文件夹卡：背景是纯色，这里用"轻量玻璃"——半透明底 + 发丝边，
 // 不采样、不模糊（省性能），但既有层次又不发死板。
-@Composable
 private fun folderFillColor(): Color =
     if (ChatColors.isDark) Color.White.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.72f)
 

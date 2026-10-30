@@ -13,11 +13,13 @@
 #   默认版本 1.15（对应 versionCode 37）
 set -euo pipefail
 
-VERSION="${1:-1.15}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=/dev/null
+. "$ROOT/scripts/glass/upstream.env"
+
+VERSION="${1:-$UPSTREAM_VERSION}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
-
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ANDROID_DIR="$ROOT/src/android"
 JNI_DIR="$ANDROID_DIR/app/src/main/jniLibs/arm64-v8a"
 ASSETS_DIR="$ANDROID_DIR/app/src/main/assets"
@@ -25,8 +27,8 @@ CACHE="$ROOT/.cache/prebuilt"
 APK="$CACHE/upstream-$VERSION.apk"
 
 # 与上游 release 附件命名一致：MinisApp-<ver>-build<N>-arm64-v8a.apk
-# build 号从 build.gradle.kts 的 versionCode 取，避免手改两处
-BUILD_N="$(rg -o 'versionCode = ([0-9]+)' "$ANDROID_DIR/app/build.gradle.kts" -r '$1' | head -1)"
+# N 必须用**上游**的 build 号，不能用我们自己的 versionCode（我们的是 3701）。
+BUILD_N="$UPSTREAM_BUILD"
 
 URL="https://github.com/OpenMinis/OpenMinis/releases/download/$VERSION/MinisApp-$VERSION-build$BUILD_N-arm64-v8a.apk"
 
@@ -51,4 +53,4 @@ done
 
 echo "✓ 完成："
 ls -la "$JNI_DIR" | tail -n +2
-ls -la "$ASSETS_DIR" | rg 'proot|alpine' || true
+ls -la "$ASSETS_DIR" | grep -E 'proot|alpine' || true

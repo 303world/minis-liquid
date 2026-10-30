@@ -17,12 +17,15 @@
 # 用法：bash scripts/glass/build-rclone-aar.sh [上游版本]
 set -euo pipefail
 
-VERSION="${1:-1.15}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=/dev/null
+. "$ROOT/scripts/glass/upstream.env"
+
+VERSION="${1:-$UPSTREAM_VERSION}"
 ANDROID_DIR="$ROOT/src/android"
 CACHE="$ROOT/.cache/prebuilt"
 TOOLS="$ROOT/.cache/tools"
-BUILD_N="$(rg -o 'versionCode = ([0-9]+)' "$ANDROID_DIR/app/build.gradle.kts" -r '$1' | head -1)"
+BUILD_N="$UPSTREAM_BUILD"
 APK="$CACHE/upstream-$VERSION.apk"
 D2J_DIR="$TOOLS/dex-tools-v2.4"
 D2J_LIB="$D2J_DIR/lib/*"

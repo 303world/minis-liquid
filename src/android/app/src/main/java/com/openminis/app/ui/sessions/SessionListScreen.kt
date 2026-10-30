@@ -104,6 +104,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
+import app.minis.glass.drawBackdrop
+import app.minis.glass.effects.blur
+import app.minis.glass.effects.lens
+import app.minis.glass.effects.vibrancy
 import app.minis.glass.GlassLiquidBar
 import app.minis.glass.backdrops.layerBackdrop
 import app.minis.glass.GlassSurface
@@ -2081,15 +2085,30 @@ private fun DualFabRow(
                 // capsule shape with no outline reads more like iOS's filled
                 // search bar than the M3 outlined field default.
                 // [GLASS] 搜索胶囊：轻量玻璃（半透明 + 发丝边），纯色底场景不采样、不模糊
+                                // [GLASS] 容器透明，玻璃由下面的 drawBackdrop 采样真实列表绘制
                                 colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = if (isDark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.70f),
-                                    unfocusedContainerColor = if (isDark) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.62f),
-                                    focusedBorderColor = Color.White.copy(alpha = if (isDark) 0.22f else 0.95f),
-                                    unfocusedBorderColor = Color.White.copy(alpha = if (isDark) 0.14f else 0.80f),
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
                                 ),
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 10.dp)
+                    // [GLASS] 真玻璃胶囊：采样背后的会话列表
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
+                    .drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { androidx.compose.foundation.shape.RoundedCornerShape(percent = 50) },
+                        effects = {
+                            vibrancy()
+                            blur(10.dp.toPx())
+                            lens(20.dp.toPx(), 20.dp.toPx())
+                        },
+                        onDrawSurface = {
+                            drawRect(if (isDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
+                        },
+                    )
                     // [T-android-search-height] Left at the component's own
                     // height. Forcing 42dp here clipped the placeholder: a
                     // plain OutlinedTextField keeps its 16dp vertical
@@ -2111,6 +2130,8 @@ private fun DualFabRow(
 
 @Composable
 private fun SelectionToolbar(
+    /** [GLASS] 采样用的列表 backdrop */
+    backdrop: app.minis.glass.Backdrop? = null,
     selectedCount: Int,
     /** [T-android-session-multi-export] JSON or plain text, picked from a menu as on iOS. */
     onExport: (com.openminis.app.share.SessionExporter.Format) -> Unit,
@@ -2122,12 +2143,20 @@ private fun SelectionToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // [GLASS] 多选工具条：轻量玻璃（半透明 + 发丝边），浮在列表上不采样
-            .background(
-                if (ChatColors.isDark) Color.White.copy(alpha = 0.08f)
-                else Color.White.copy(alpha = 0.80f),
+            // [GLASS] 多选工具条：真玻璃，采样背后的会话列表
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) },
+                effects = {
+                    vibrancy()
+                    blur(10.dp.toPx())
+                    lens(20.dp.toPx(), 20.dp.toPx())
+                },
+                onDrawSurface = {
+                    drawRect(if (ChatColors.isDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
+                },
             )
-            .border(0.5.dp, Color.White.copy(alpha = if (ChatColors.isDark) 0.14f else 0.9f))
             .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {

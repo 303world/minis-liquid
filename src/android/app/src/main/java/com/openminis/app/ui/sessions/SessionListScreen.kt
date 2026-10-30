@@ -1056,7 +1056,7 @@ fun SessionListScreen(
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                top = 112.dp,  // [GLASS] 让出"不透明标题区"的高度，模糊带仍与首行重叠
+                                top = 140.dp,  // [GLASS] 让出整个顶栏高度（96+44）
                                 bottom = 96.dp,
                             ),
                         ) {
@@ -1384,6 +1384,7 @@ fun SessionListScreen(
                 if (isSelecting) {
                     // Selection toolbar at bottom (matching iOS: Export + Delete)
                     SelectionToolbar(
+                        backdrop = fabBackdrop,   // [GLASS] 采样列表
                         selectedCount = selectedIds.size,
                         onExport = { format ->
                             // Displayed order, persisted rows only: the synthetic
@@ -1468,9 +1469,9 @@ fun SessionListScreen(
                 // （Haze 那版在真机上完全没渲染，已弃用）
                 GlassLiquidBar(
                     height = 184.dp,
-                    solidHeight = 112.dp,   // 状态栏 + 标题：整块不透明
-                    blurBand = 72.dp,       // 只有这条带子做模糊
-                    blurRadius = 8.dp,
+                    solidHeight = 96.dp,    // 状态栏 + 标题
+                    blurBand = 44.dp,       // 标题下方到原版顶栏底部
+                    blurRadius = 45.dp,   // SaltUI 原值
                     refractionHeight = 24.dp,
                     refractionAmount = 24.dp,
                     dark = isDark,

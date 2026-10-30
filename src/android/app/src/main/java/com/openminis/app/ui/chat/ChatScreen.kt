@@ -7492,9 +7492,9 @@ fun ChatScreen(
             glass = {
                 GlassLiquidBar(
                     height = 196.dp,
-                    solidHeight = 124.dp,     // 状态栏 + 标题 + 副标题：整块不透明
-                    blurBand = 72.dp,
-                    blurRadius = 8.dp,        // 参考库的条就是 8dp，半径大反而糊成一团
+                    solidHeight = 96.dp,      // 状态栏 + 标题（红线以上，不糊）
+                    blurBand = 56.dp,         // 红线以下到原版顶栏底部：只这里糊
+                    blurRadius = 45.dp,       // SaltUI blurryGlass 的原值
                     refractionHeight = 24.dp,
                     refractionAmount = 24.dp,
                     dark = com.openminis.app.ui.theme.ChatColors.isDark,

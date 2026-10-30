@@ -451,6 +451,9 @@ internal fun ModelPickerSheet(
                     stringResource(R.string.model_picker_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    // [GLASS] 显式取色：弹窗窗口里的 LocalContentColor 不跟随应用主题，
+                    // 深色模式下会退成黑色（主人截图里的黑字）。
+                    color = ChatColors.primaryText,
                 )
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                     MinisTextButton(onClick = onDismiss) {

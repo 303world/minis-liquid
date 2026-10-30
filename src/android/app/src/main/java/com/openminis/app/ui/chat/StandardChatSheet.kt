@@ -78,6 +78,7 @@ fun StandardChatSheet(
         sheetState = sheetState,
         // [GLASS] 半透明容器（配合系统背景模糊）
         containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
         dragHandle = { CompactDragHandle() },
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = onBack == null),
     ) {

@@ -67,6 +67,7 @@ fun MinisAlertDialog(
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = com.openminis.app.ui.glass.glassSheetColor(),
+            contentColor = MaterialTheme.colorScheme.onSurface,
             border = com.openminis.app.ui.glass.glassSheetBorder(),
             tonalElevation = 0.dp,
         ) {

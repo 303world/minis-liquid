@@ -166,7 +166,8 @@ fun UnifiedModelPickerSheet(
     val cardShape = RoundedCornerShape(14.dp)
 
     ModalBottomSheet(
-        containerColor = com.openminis.app.ui.glass.glassSheetColor(),  // [GLASS]
+        containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,  // [GLASS]
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         // Slim drag handle, same as the main picker / StandardChatSheet — the

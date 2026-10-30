@@ -5572,47 +5572,26 @@ fun ChatScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            // [GLASS] 输入卡 = 液态玻璃：采样背后的消息列表 + 折射 + 高光。
-                            // 上游这张卡是纯自绘（drawBehind 画底色+阴影），这里把底色交给玻璃，
-                            // drawBehind 只保留阴影。
-                            // clip 必须在 drawBackdrop **之前**：这样玻璃按 20dp 圆角裁剪，
-                            // 否则 onDrawSurface 的 drawRect 会画出一块直边矩形背板。
+                            // [GLASS] 输入卡玻璃：clip 必须在 drawBackdrop 之前，
+                            // 否则 onDrawSurface 的 drawRect 会画成直边矩形背板。
                             .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
                             .drawBackdrop(
                                 backdrop = composerBackdrop,
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
                                 effects = {
                                     vibrancy()
-                                    blur(8.dp.toPx())
+                                    blur(10.dp.toPx())
                                     lens(24.dp.toPx(), 24.dp.toPx())
                                 },
                                 onDrawSurface = {
                                     drawRect(
                                         if (composerGlassDark) {
-                                            Color.Black.copy(alpha = 0.12f)
+                                            Color.Black.copy(alpha = 0.16f)
                                         } else {
-                                            Color.White.copy(alpha = 0.14f)
+                                            Color.White.copy(alpha = 0.22f)
                                         },
                                     )
                                 },
-                            )
-                            // [T-in-chat-search] Hidden while searching but kept in
-                            // the layout (iOS ChatSearchComposerHider), so the list's
-                            // bottom inset does not jump; no touches, no a11y.
-                            .then(
-                                if (chatSearch.isActive) {
-                                    Modifier
-                                        .alpha(0f)
-                                        .clearAndSetSemantics { }
-                                        .pointerInput(Unit) {
-                                            awaitPointerEventScope {
-                                                while (true) {
-                                                    awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
-                                                        .changes.forEach { it.consume() }
-                                                }
-                                            }
-                                        }
-                                } else Modifier,
                             )
                             .drawBehind {
                                 val radiusPx = 20.dp.toPx()
@@ -8707,6 +8686,7 @@ private fun ThinkingLevelSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
     ) {
         // [GLASS] 独立窗口：系统级背景模糊
         com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)

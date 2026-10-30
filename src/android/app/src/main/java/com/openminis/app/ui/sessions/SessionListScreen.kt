@@ -1052,7 +1052,7 @@ fun SessionListScreen(
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                top = 132.dp,   // [GLASS] 与顶栏高度一致
+                                top = 96.dp,   // [GLASS] 与顶栏（含渐变带）对齐，避免下方出现空档
                                 bottom = 96.dp,
                             ),
                         ) {
@@ -1900,7 +1900,8 @@ private fun DualFabRow(
     val topGroups = remember(modelGroups) { modelGroups.take(10) }
 
     val chatFab: @Composable () -> Unit = {
-        Box(
+        // [GLASS] 搜索激活时隐藏新建按钮：它和搜索胶囊同一行，会重叠错位
+        if (!isSearchActive) Box(
             modifier = Modifier
                 .offset { IntOffset(chatDragX.roundToInt(), 0) }
                 .pointerInput(Unit) {

@@ -1,6 +1,8 @@
 package app.minis.glass
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -105,6 +107,20 @@ fun GlassLiquidBar(
                     },
             )
         }
+        // [GLASS] 顶部不透明渐隐：状态栏/标题所在的区域不应该直接露出裸内容
+        // （之前"上面缺一块"就是这里没底）。
+        Box(
+            Modifier
+                .align(androidx.compose.ui.Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(height - blurBand)
+                .background(
+                    Brush.verticalGradient(
+                        0f to (if (dark) Color.Black.copy(alpha = 0.92f) else Color.White.copy(alpha = 0.92f)),
+                        1f to (if (dark) Color.Black.copy(alpha = 0f) else Color.White.copy(alpha = 0f)),
+                    ),
+                ),
+        )
         content()
     }
 }

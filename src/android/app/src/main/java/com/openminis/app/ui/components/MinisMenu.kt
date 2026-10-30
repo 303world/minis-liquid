@@ -76,7 +76,7 @@ fun MinisMenu(
     // visibility). The dark-mode `border` below adds the extra edge definition.
     // [GLASS] 半透明底色：菜单是独立窗口，真正的"玻璃"靠系统背景模糊
     // （ApplyWindowBackgroundBlur）+ 这层淡色 + 发丝描边叠出来。
-    containerColor: Color = if (ChatColors.isDark) Color(0xE61C1C1E) else Color(0xB8FFFFFF),
+    containerColor: Color = if (ChatColors.isDark) Color(0xE61C1C1E) else Color(0xF2FFFFFF),
     tonalElevation: Dp = 3.dp,
     // [T-android-menu-shadow-clip] Surface's own shadow, capped at
     // [MinisMenuPosition.MAX_POPUP_SHADOW_ELEVATION] (8dp).

@@ -2002,8 +2002,8 @@ private fun DualFabRow(
                                 onHorizontalDrag = { _, dragAmount -> searchDragX += dragAmount },
                             )
                         }
-                        .shadow(6.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.15f)),
-                    .clickable(onClick = onSearchToggle),
+                        .shadow(6.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.15f))
+                        .clickable(onClick = onSearchToggle),
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.sessionlist_search_action), tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))

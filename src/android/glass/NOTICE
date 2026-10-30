@@ -1,0 +1,18 @@
+Minis Liquid — :glass module
+============================
+
+本模块包含源自下列项目的代码：
+
+  AndroidLiquidGlass ("Backdrop")
+  https://github.com/Kyant0/AndroidLiquidGlass
+  Copyright the AndroidLiquidGlass authors
+  Licensed under the Apache License, Version 2.0 (见 LICENSE-APACHE-2.0)
+
+修改说明（依 Apache-2.0 §4(b)）：
+  - 仅保留 Android 目标，删除 Kotlin Multiplatform 的 skiko / desktop / js / wasm / ios 源码集
+  - expect/actual 声明合并为单一 Android 实现
+  - 移除对 com.kyant.shapes 的运行时依赖，改由 app.minis.glass.shape 下的自研 Shape 提供
+  - 包名由 com.kyant.backdrop 改为 app.minis.glass
+  - 未修改着色器（AGSL）逻辑本身
+
+本模块整体作为 Minis Liquid 的一部分，以 GNU GPL v3 分发（见仓库根目录 LICENSE）。

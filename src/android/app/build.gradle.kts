@@ -393,6 +393,8 @@ androidComponents {
 
 dependencies {
     // Compose BOM
+    // [GLASS] 液态玻璃渲染内核
+    implementation(project(":glass"))
     val composeBom = platform("androidx.compose:compose-bom:2025.09.00")
     implementation(composeBom)
     implementation("androidx.compose.material3:material3")

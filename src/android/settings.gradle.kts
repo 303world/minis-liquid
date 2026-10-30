@@ -28,4 +28,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Minis"
+// [GLASS] 液态玻璃渲染内核
+include(":glass")
 include(":app")

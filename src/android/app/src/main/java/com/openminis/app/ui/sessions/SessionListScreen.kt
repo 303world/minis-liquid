@@ -158,7 +158,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.SolidColor
@@ -1455,7 +1454,9 @@ fun SessionListScreen(
             glass = {
                 GlassSurface(
                     level = GlassTokens.Bar,
-                    shape = RectangleShape,   // 顶栏贴边，不做圆角（与 iOS 导航栏一致）
+                    // [GLASS] 用 0dp 圆角的 RoundedCornerShape 而不是 RectangleShape：
+                    // 前者是 CornerBasedShape，折射着色器能算 SDF；后者会直接抛异常。
+                    shape = RoundedCornerShape(0.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(

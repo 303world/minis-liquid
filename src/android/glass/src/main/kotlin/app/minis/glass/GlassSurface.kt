@@ -3,6 +3,7 @@ package app.minis.glass
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import app.minis.glass.effects.blur
 import app.minis.glass.effects.lens
 import app.minis.glass.effects.vibrancy
+import app.minis.glass.shape.RoundedCornerRadiiProvider
 import app.minis.glass.token.GlassLevel
 import app.minis.glass.token.GlassTokens
 
@@ -70,7 +72,12 @@ fun GlassSurface(
                         if (GlassCapability.supportsBlur(quality)) {
                             blur(level.blurRadius.toPx())
                         }
-                        if (GlassCapability.supportsRefraction(quality) &&
+                        // [GLASS] 折射要用 SDF，只有圆角形状（和实现了 RoundedCornerRadiiProvider
+                        // 的自研形状）才有。这里必须挡一下 —— 否则 RectangleShape 之类的
+                        // 会直接在首帧抛 UnsupportedOperationException 把 App 打死（已踩过）。
+                        val canRefract = shape is CornerBasedShape || shape is RoundedCornerRadiiProvider
+                        if (canRefract &&
+                            GlassCapability.supportsRefraction(quality) &&
                             level.refractionHeight > 0.dp
                         ) {
                             lens(

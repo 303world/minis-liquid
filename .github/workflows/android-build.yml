@@ -86,9 +86,14 @@ jobs:
 
       - name: Assemble
         working-directory: src/android
+        # 上游 gradle.properties 只给了 Gradle 守护进程 2GB（为开发机保守设置），
+        # 29 万行 Kotlin 在 CI 上会 OOM（GC overhead limit exceeded / IR lowering）。
+        # 命令行覆盖优先级高于 gradle.properties，所以不改上游文件。
         run: |
           ./gradlew ${{ inputs.task || ':app:assembleGithubDebug' }} \
             -Pminis.prebuiltNative=true \
+            -Pkotlin.daemon.jvmargs='-Xmx6g -XX:MaxMetaspaceSize=1g' \
+            -Dorg.gradle.jvmargs='-Xmx5g -Dfile.encoding=UTF-8' \
             --stacktrace --console=plain
 
       - name: Upload APK

@@ -163,3 +163,14 @@ src/android/app/libs/rclone.aar
 deps/aot/*.S
 deps/aot/.build/
 deps/aot/.build-iphonesimulator/
+
+# ── [GLASS] fork-specific ──
+# Rootfs asset name variant the release APK ships (upstream only ignores .tar.gz).
+src/android/app/src/main/assets/alpine-minirootfs.tar
+# Build-time customization values (upstream keeps the real one in its private repo).
+src/android/app/provider-customization.properties
+# Prebuilt artifact cache used by scripts/glass/*.sh (upstream APK, dex2jar, AAR staging).
+.cache/
+
+# Kotlin 2.x session dir
+src/android/.kotlin/

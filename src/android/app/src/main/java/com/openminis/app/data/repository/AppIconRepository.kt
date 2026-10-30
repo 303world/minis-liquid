@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.util.Log
+import com.openminis.app.BuildConfig
 
 /**
  * T-android-dynamic-app-icon: Manage the launcher-icon alias the system
@@ -29,7 +30,9 @@ object AppIconRepository {
     private const val TAG = "AppIconRepository"
     private const val PREFS = "app_icon_prefs"
     private const val KEY_SELECTED_ID = "selected_icon_id"
-    private const val PACKAGE_NAME = "com.openminis.app"
+    // [GLASS] 不能硬编码包名：共存版 applicationId 是 com.openminis.app.glass，
+    // 写死会导致切换备用图标时 ComponentName 指向未安装的包。
+    private const val PACKAGE_NAME = BuildConfig.APPLICATION_ID
 
     enum class Variant(val id: String, val aliasClass: String) {
         Auto("auto", "$PACKAGE_NAME.MainActivityIconAuto"),

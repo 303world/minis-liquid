@@ -1,0 +1,100 @@
+# [GLASS] 云端构建：Minis Liquid 的所有构建都在这里跑，不在任何人的手机上跑。
+#
+# 设计要点：
+# - **不用 NDK / CMake**：`-Pminis.prebuiltNative=true` 跳过原生构建，直接复用上游
+#   release APK 里编好的 .so（libgojni / onnxruntime / VAD / pty_bridge / jieba / crash handler）。
+#   本 fork 只改 UI，不碰原生代码，这能省掉 30~40 分钟和整个 NDK 工具链。
+# - **rclone.aar 现场重建**：上游不提交该文件（Go + gomobile 产物），用
+#   scripts/glass/build-rclone-aar.sh 从官方 APK 的 classes.dex 还原（保留原始字节码）。
+# - **签名**：上游 release 变体用的是 debug 签名配置，所以这里 `assembleGithubRelease`
+#   也能直接产出可安装包，不需要注入 keystore。将来要做正式换签名再加 secrets。
+name: Android Build
+
+on:
+  push:
+    branches: [glass-ui]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Gradle task'
+        required: false
+        default: ':app:assembleGithubDebug'
+      upstream_version:
+        description: 'Upstream release tag to lift native libs from (e.g. 1.15)'
+        required: false
+        default: '1.15'
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install helper tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep zip unzip
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Local build config
+        run: |
+          cp src/android/app/provider-customization.properties.example \
+             src/android/app/provider-customization.properties
+          echo "sdk.dir=$ANDROID_HOME" > src/android/local.properties
+
+      - name: Fetch prebuilt native libs + sandbox assets from upstream APK
+        run: bash scripts/glass/fetch-prebuilt-native.sh "${{ inputs.upstream_version || '1.15' }}"
+
+      - name: Rebuild rclone.aar
+        run: bash scripts/glass/build-rclone-aar.sh "${{ inputs.upstream_version || '1.15' }}"
+
+      - name: Assemble
+        working-directory: src/android
+        run: |
+          ./gradlew ${{ inputs.task || ':app:assembleGithubDebug' }} \
+            -Pminis.prebuiltNative=true \
+            --stacktrace --console=plain
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minis-liquid-apk
+          path: |
+            src/android/app/build/outputs/apk/github/**/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            src/android/app/build/reports/**
+          if-no-files-found: ignore
+          retention-days: 7

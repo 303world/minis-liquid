@@ -15,6 +15,14 @@ plugins {
 // `provider-customization.properties.example` (empty values). A build without a
 // configured value compiles fine but fails at runtime the first time the
 // value is required (see ClaudeOAuthManager). See docs/PUBLISH_POLICY.md.
+// [GLASS] 预编译原生库模式。上游在 app/src/main/cpp 里用 CMake 编 3 个 .so
+// (pty_bridge / minis_crash_handler / jieba_jni)，这要求宿主机能跑 NDK —— 而
+// NDK 只提供 x86_64 linux / macOS / Windows 主机工具链，aarch64 Linux 主机
+// (手机内的 PRoot 沙箱)编不了。开启 -Pminis.prebuiltNative=true 时跳过 CMake，
+// 直接复用 app/src/main/jniLibs 下从官方 APK 抽出来的 .so。
+// 默认 false：CI 与桌面仍然从源码编原生库，行为与上游一致。
+val prebuiltNative = (findProperty("minis.prebuiltNative") as String?)?.toBoolean() ?: false
+
 val appCustomization = Properties().apply {
     val f = rootProject.file("app/provider-customization.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -33,11 +41,14 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.openminis.app"
+        // [GLASS] 共存版包名：与官方版可并排安装，官方版数据不受影响。
+        // 改包名的全部影响面见 MODIFICATIONS.md（仅 shortcuts.xml 与 AppIconRepository 两处硬编码）。
+        applicationId = "com.openminis.app.glass"
         minSdk = 26
         targetSdk = 35
-        versionCode = 37
-        versionName = "1.15"
+        // [GLASS] 版本策略：versionCode = 上游 ×100 + fork 构建号，便于看出上游基线。
+        versionCode = 3701
+        versionName = "1.15-liquid.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -63,25 +74,41 @@ android {
         // prerelease flag and cut a tag at its first '-') see them as version
         // 0 and never offer them. UPDATE_CHANNEL is the channel a fresh
         // install starts on; the user can switch to beta in About.
-        buildConfigField("String", "RELEASE_REPO", "\"OpenMinis/OpenMinis\"")
+        // [GLASS] 指向本 fork 的 Releases，否则 App 内检查更新会去拉官方包（签名不同，装不上）。
+        buildConfigField("String", "RELEASE_REPO", "\"303world/minis-liquid\"")
         buildConfigField("String", "UPDATE_CHANNEL", "\"stable\"")
 
         ndk {
             abiFilters += listOf("arm64-v8a")
         }
 
-        externalNativeBuild {
-            cmake {
-                cppFlags += "-std=c++17"
-                arguments += "-DANDROID_STL=c++_shared"
+        // [GLASS] prebuiltNative 时整段跳过，见文件顶部说明。
+        if (!prebuiltNative) {
+            externalNativeBuild {
+                cmake {
+                    cppFlags += "-std=c++17"
+                    arguments += "-DANDROID_STL=c++_shared"
+                }
             }
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
+    if (!prebuiltNative) {
+        externalNativeBuild {
+            cmake {
+                path = file("src/main/cpp/CMakeLists.txt")
+                version = "3.22.1"
+            }
+        }
+    }
+
+    // [GLASS] 预编译模式下 .so 不能再被 strip：strip 走 NDK 里的 llvm-strip，
+    // 而 aarch64 主机上根本没有 NDK。保留调试符号（体积略大，无功能影响）。
+    if (prebuiltNative) {
+        packaging {
+            jniLibs {
+                keepDebugSymbols += listOf("**/*.so")
+            }
         }
     }
 

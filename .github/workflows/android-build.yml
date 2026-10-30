@@ -102,6 +102,15 @@ jobs:
             -Dorg.gradle.jvmargs='-Xmx5g -Dfile.encoding=UTF-8' \
             --stacktrace --console=plain
 
+      - name: Verify APK identity
+        working-directory: src/android
+        run: |
+          APK="$(find app/build/outputs/apk/github -name '*.apk' | head -1)"
+          echo "APK: $APK  ($(du -h "$APK" | cut -f1))"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -r | head -1)"
+          "$AAPT" dump badging "$APK" | grep -E '^(package|launchable-activity)' || true
+          "$AAPT" dump packagename "$APK" || true
+
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4

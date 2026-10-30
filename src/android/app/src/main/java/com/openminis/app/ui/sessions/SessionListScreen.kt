@@ -2147,6 +2147,8 @@ private fun SelectionToolbar(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // [GLASS] 绘制回调里不能读 @Composable 属性，提前取
+    val tbDark = ChatColors.isDark
     Row(
         modifier = modifier
             .fillMaxWidth()

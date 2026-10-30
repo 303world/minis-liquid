@@ -98,18 +98,27 @@ jobs:
         run: bash scripts/glass/build-rclone-aar.sh "${{ inputs.upstream_version || '1.15' }}"
 
       # [GLASS] 固定签名：没有它每次构建都是新密钥，用户永远只能卸载重装。
+      # 注意：GitHub 不允许在 step 的 if 里用 secrets 上下文，只能在 shell 里判空。
       - name: Set up stable signing
-        if: ${{ secrets.GLASS_KEYSTORE_BASE64 != '' }}
+        env:
+          KS_B64: ${{ secrets.GLASS_KEYSTORE_BASE64 }}
+          KS_STORE_PW: ${{ secrets.GLASS_STORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.GLASS_KEY_ALIAS }}
+          KS_KEY_PW: ${{ secrets.GLASS_KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.GLASS_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/minisglass.jks"
+          if [ -z "$KS_B64" ]; then
+            echo "::warning::GLASS_KEYSTORE_BASE64 未配置，回退到 AGP 自动生成的 debug 密钥（每次构建签名都会变，无法覆盖安装）"
+            exit 0
+          fi
+          printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/minisglass.jks"
           test -s "$RUNNER_TEMP/minisglass.jks"
           {
             echo "MINIS_GLASS_KEYSTORE=$RUNNER_TEMP/minisglass.jks"
-            echo "MINIS_GLASS_STORE_PASSWORD=${{ secrets.GLASS_STORE_PASSWORD }}"
-            echo "MINIS_GLASS_KEY_ALIAS=${{ secrets.GLASS_KEY_ALIAS }}"
-            echo "MINIS_GLASS_KEY_PASSWORD=${{ secrets.GLASS_KEY_PASSWORD }}"
+            echo "MINIS_GLASS_STORE_PASSWORD=$KS_STORE_PW"
+            echo "MINIS_GLASS_KEY_ALIAS=$KS_ALIAS"
+            echo "MINIS_GLASS_KEY_PASSWORD=$KS_KEY_PW"
           } >> "$GITHUB_ENV"
-          echo "keystore ready: $(ls -l "$RUNNER_TEMP/minisglass.jks" | awk '{print $5}') bytes"
+          echo "keystore ready: $(wc -c < "$RUNNER_TEMP/minisglass.jks") bytes"
 
       - name: Assemble
         working-directory: src/android

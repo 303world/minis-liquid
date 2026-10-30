@@ -2021,6 +2021,8 @@ private fun DualFabRow(
         }
     }
 
+    // [GLASS] 绘制回调里不能读 @Composable 属性，提前取
+    val tbDark = ChatColors.isDark
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -2096,18 +2098,23 @@ private fun DualFabRow(
                     .weight(1f)
                     .padding(horizontal = 10.dp)
                     // [GLASS] 真玻璃胶囊：采样背后的会话列表
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
-                    .drawBackdrop(
-                        backdrop = backdrop,
-                        shape = { androidx.compose.foundation.shape.RoundedCornerShape(percent = 50) },
-                        effects = {
-                            vibrancy()
-                            blur(10.dp.toPx())
-                            lens(20.dp.toPx(), 20.dp.toPx())
-                        },
-                        onDrawSurface = {
-                            drawRect(if (isDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
-                        },
+                    .then(
+                        backdrop?.let { bd ->
+                            Modifier
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
+                                .drawBackdrop(
+                                    backdrop = bd,
+                                    shape = { androidx.compose.foundation.shape.RoundedCornerShape(percent = 50) },
+                                    effects = {
+                                        vibrancy()
+                                        blur(10.dp.toPx())
+                                        lens(20.dp.toPx(), 20.dp.toPx())
+                                    },
+                                    onDrawSurface = {
+                                        drawRect(if (isDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
+                                    },
+                                )
+                        } ?: Modifier,
                     )
                     // [T-android-search-height] Left at the component's own
                     // height. Forcing 42dp here clipped the placeholder: a
@@ -2144,18 +2151,23 @@ private fun SelectionToolbar(
         modifier = modifier
             .fillMaxWidth()
             // [GLASS] 多选工具条：真玻璃，采样背后的会话列表
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-            .drawBackdrop(
-                backdrop = backdrop,
-                shape = { androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) },
-                effects = {
-                    vibrancy()
-                    blur(10.dp.toPx())
-                    lens(20.dp.toPx(), 20.dp.toPx())
-                },
-                onDrawSurface = {
-                    drawRect(if (ChatColors.isDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
-                },
+            .then(
+                backdrop?.let { bd ->
+                    Modifier
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                        .drawBackdrop(
+                            backdrop = bd,
+                            shape = { androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) },
+                            effects = {
+                                vibrancy()
+                                blur(10.dp.toPx())
+                                lens(20.dp.toPx(), 20.dp.toPx())
+                            },
+                            onDrawSurface = {
+                                drawRect(if (tbDark) Color.Black.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.18f))
+                            },
+                        )
+                } ?: Modifier,
             )
             .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,

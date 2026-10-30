@@ -3860,7 +3860,9 @@ fun ChatScreen(
                         // breath under the title bar. Bottom padding and inter-
                         // message spacing are untouched.
                         contentPadding = PaddingValues(
-                            top = 4.dp,
+                            // [GLASS] 顶栏改由浮层绘制后，Scaffold 不再为它留位置；
+                            // 列表自己让出这段高度，滚动时才从玻璃下面穿过。
+                            top = 140.dp,
                             bottom = if (bottomReserve == 0.dp) 12.dp else bottomReserve,
                         ),
                         modifier = Modifier
@@ -7472,7 +7474,7 @@ fun ChatScreen(
             glass = {
                 GlassProgressiveBar(
                     hazeState = app.minis.glass.LocalHazeState.current,
-                    height = 132.dp,
+                    height = 140.dp,
                     blurRadius = 45.dp,   // SaltUI 的取值
                     dark = com.openminis.app.ui.theme.ChatColors.isDark,
                     modifier = Modifier.fillMaxWidth(),

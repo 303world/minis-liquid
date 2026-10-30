@@ -1045,7 +1045,7 @@ fun SessionListScreen(
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                top = 64.dp,
+                                top = 132.dp,   // [GLASS] 与顶栏高度一致
                                 bottom = 96.dp,
                             ),
                         ) {

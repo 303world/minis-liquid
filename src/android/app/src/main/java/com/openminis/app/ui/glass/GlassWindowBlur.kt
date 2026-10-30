@@ -1,6 +1,6 @@
 package com.openminis.app.ui.glass
 
-import android.app.WindowManager
+import android.view.WindowManager
 import android.os.Build
 import android.view.View
 import android.view.WindowManager.LayoutParams

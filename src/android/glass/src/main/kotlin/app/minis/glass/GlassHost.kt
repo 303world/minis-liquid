@@ -9,12 +9,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import app.minis.glass.backdrops.layerBackdrop
 import app.minis.glass.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
-
-/** 页面级的 Haze 状态（渐进模糊用）。由 [GlassHost] 提供，顶栏等组件从这里取。 */
-val LocalHazeState = compositionLocalOf<HazeState?> { null }
 
 /**
  * [GLASS] 页面级玻璃容器。
@@ -38,18 +32,14 @@ fun GlassHost(
     glass: @Composable BoxScope.() -> Unit,
 ) {
     val backdrop = rememberLayerBackdrop()
-    // [GLASS] 第二套：Haze 的渐进模糊（顶栏用）。两套共用同一个"内容层"概念，
-    // 但 Haze 支持"上实下虚"的渐隐，是 RenderEffect 做不到的。
-    val hazeState = rememberHazeState()
 
     CompositionLocalProvider(
         LocalGlassBackdrop provides backdrop,
-        LocalHazeState provides hazeState,
         LocalGlassQuality provides quality,
         LocalGlassDark provides dark,
     ) {
         Box(modifier) {
-            Box(Modifier.matchParentSize().hazeSource(hazeState).layerBackdrop(backdrop)) {
+            Box(Modifier.matchParentSize().layerBackdrop(backdrop)) {
                 content()
             }
             glass()

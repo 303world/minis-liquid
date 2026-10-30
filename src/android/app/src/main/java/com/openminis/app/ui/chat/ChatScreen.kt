@@ -204,7 +204,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.draw.clip
-import app.minis.glass.GlassProgressiveBar
+import app.minis.glass.GlassLiquidBar
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
 import androidx.compose.ui.draw.drawBehind
@@ -7472,14 +7472,19 @@ fun ChatScreen(
             }
             },
             glass = {
-                GlassProgressiveBar(
-                    hazeState = app.minis.glass.LocalHazeState.current,
+                GlassLiquidBar(
                     height = 140.dp,
-                    blurRadius = 45.dp,   // SaltUI 的取值
+                    blurRadius = 8.dp,        // 参考库的条就是 8dp，半径大反而糊成一团
+                    refractionHeight = 24.dp,
+                    refractionAmount = 24.dp,
                     dark = com.openminis.app.ui.theme.ChatColors.isDark,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(
+                        // [GLASS] 顶栏自身不能刷底色，否则玻璃被盖住
+                        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                        ),
                         title = {
                             // iOS-style centered layout: "Minis" + group row + provider·model row
                             Box(

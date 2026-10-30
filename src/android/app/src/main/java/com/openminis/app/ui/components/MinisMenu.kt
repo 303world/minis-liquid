@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
@@ -97,10 +98,22 @@ fun MinisMenu(
     shadowElevation: Dp = 6.dp,
     // Light mode also gets a hairline: the popup's edge needs a subtle line
     // of its own to stay crisply bounded on light surfaces.
+    // [GLASS] 用**渐变发丝边**代替纯色描边：上亮下暗 = 玻璃的镜面高光边缘，
+    // 这是"磨砂白板"和"玻璃"最直观的区别之一（iOS 的浮层都是这么画的）。
     border: BorderStroke? = if (ChatColors.isDark) {
-        BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
+        BorderStroke(
+            0.5.dp,
+            Brush.verticalGradient(
+                listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.05f)),
+            ),
+        )
     } else {
-        BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.05f))
+        BorderStroke(
+            0.5.dp,
+            Brush.verticalGradient(
+                listOf(Color.White, Color.Black.copy(alpha = 0.06f)),
+            ),
+        )
     },
     minWidth: Dp = 180.dp,
     // T238: when true, anchor the menu's RIGHT edge to the anchor box's

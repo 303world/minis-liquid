@@ -104,7 +104,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
-import app.minis.glass.GlassProgressiveBar
+import app.minis.glass.GlassLiquidBar
 import app.minis.glass.token.GlassTokens
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
@@ -1452,12 +1452,13 @@ fun SessionListScreen(
             }
             },
             glass = {
-                // [GLASS] 渐进模糊顶栏：参数照抄 SaltUI（Haze, blur 45dp, tint 0x80FFFFFF,
-                // 垂直 1→0 渐隐）。之前的均匀模糊在白底上看不出任何区别。
-                GlassProgressiveBar(
-                    hazeState = app.minis.glass.LocalHazeState.current,
+                // [GLASS] 液态玻璃顶栏：采样页面内容 + 边缘折射 + 0.5dp 高光 + 垂直渐隐。
+                // （Haze 那版在真机上完全没渲染，已弃用）
+                GlassLiquidBar(
                     height = 132.dp,
-                    blurRadius = 45.dp,
+                    blurRadius = 8.dp,
+                    refractionHeight = 24.dp,
+                    refractionAmount = 24.dp,
                     dark = isDark,
                     modifier = Modifier.fillMaxWidth(),
                 ) {

@@ -49,7 +49,4 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.annotation:annotation:1.9.1")
-    // [GLASS] 渐进模糊用 Haze（SaltUI / 椒盐音乐 用的就是它）。
-    // 必须 1.6.x：1.7+ 用 Kotlin 2.3 编译，我们的 Kotlin 2.1 读不了它的元数据。
-    api("dev.chrisbanes.haze:haze:1.6.10")  // api：HazeState 类型要暴露给 :app
 }

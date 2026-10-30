@@ -104,7 +104,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
-import app.minis.glass.GlassSurface
+import app.minis.glass.GlassFadeBar
 import app.minis.glass.token.GlassTokens
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
@@ -1452,11 +1452,11 @@ fun SessionListScreen(
             }
             },
             glass = {
-                GlassSurface(
-                    level = GlassTokens.Bar,
-                    // [GLASS] 用 0dp 圆角的 RoundedCornerShape 而不是 RectangleShape：
-                    // 前者是 CornerBasedShape，折射着色器能算 SDF；后者会直接抛异常。
-                    shape = RoundedCornerShape(0.dp),
+                // [GLASS] 用"渐变模糊"而不是整条均匀玻璃：浅色内容上均匀模糊看不出来，
+                // 只有越往上越糊、往下消散，才有 iOS / SaltUI 那种顶栏观感。
+                GlassFadeBar(
+                    height = 104.dp,
+                    blurRadius = 24.dp,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TopAppBar(

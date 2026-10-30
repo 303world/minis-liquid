@@ -529,7 +529,7 @@ private fun buildBugReportUrl(): String {
     // since URLEncoder turns spaces into '+' which GitHub also accepts but
     // the spec calls for the literal "[Bug] " form.
     val title = java.net.URLEncoder.encode("[Bug] ", "UTF-8")
-    return "https://github.com/OpenMinis/OpenMinis/issues/new" +
+    return "https://github.com/303world/minis-liquid/issues/new" +
         "?template=bug_report.md" +
         "&title=$title" +
         "&body=$encodedBody"

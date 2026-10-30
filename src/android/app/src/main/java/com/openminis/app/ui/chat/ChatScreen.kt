@@ -3870,7 +3870,7 @@ fun ChatScreen(
                         contentPadding = PaddingValues(
                             // [GLASS] 顶栏改由浮层绘制后，Scaffold 不再为它留位置；
                             // 列表自己让出这段高度，滚动时才从玻璃下面穿过。
-                            top = 140.dp,
+                            top = 124.dp,
                             bottom = if (bottomReserve == 0.dp) 12.dp else bottomReserve,
                         ),
                         modifier = Modifier
@@ -7491,7 +7491,9 @@ fun ChatScreen(
             },
             glass = {
                 GlassLiquidBar(
-                    height = 140.dp,
+                    height = 196.dp,
+                    solidHeight = 124.dp,     // 状态栏 + 标题 + 副标题：整块不透明
+                    blurBand = 72.dp,
                     blurRadius = 8.dp,        // 参考库的条就是 8dp，半径大反而糊成一团
                     refractionHeight = 24.dp,
                     refractionAmount = 24.dp,

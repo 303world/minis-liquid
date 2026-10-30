@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,8 +41,10 @@ import app.minis.glass.token.GlassTokens
 fun GlassLiquidBar(
     modifier: Modifier = Modifier,
     height: Dp = 140.dp,
-    /** 模糊带高度：只覆盖标题**下方**这一条，标题本身保持清晰（可读性关键）。 */
-    blurBand: Dp = 84.dp,
+    /** 标题区高度：这一块是**完全不透明**的页面底色（SaltUI 的 title bar 就是这么做的）。 */
+    solidHeight: Dp = 112.dp,
+    /** 模糊带高度：紧贴标题区下方，上实下虚。 */
+    blurBand: Dp = 72.dp,
     /** 模糊半径。参考库的条只用 8dp —— 半径一大内容就糊成一团。 */
     blurRadius: Dp = 8.dp,
     refractionHeight: Dp = 24.dp,
@@ -59,7 +62,8 @@ fun GlassLiquidBar(
                 Modifier
                     // [GLASS] 关键：玻璃只画在标题下方的一条带子里，而不是整块顶栏。
                     // 椒盐音乐的可读性来自这一点 —— 标题所在的区域本身不糊。
-                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                    .align(androidx.compose.ui.Alignment.TopCenter)
+                    .offset(y = solidHeight)
                     .fillMaxWidth()
                     .height(blurBand)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -107,17 +111,28 @@ fun GlassLiquidBar(
                     },
             )
         }
-        // [GLASS] 顶部不透明渐隐：状态栏/标题所在的区域不应该直接露出裸内容
-        // （之前"上面缺一块"就是这里没底）。
+        // [GLASS] 标题区整块不透明（SaltUI 的做法）：状态栏+标题所在的区域
+        // 不应该让内容透上来，否则"最上面露裸内容"。只有紧贴其下的一条带子做模糊。
         Box(
             Modifier
                 .align(androidx.compose.ui.Alignment.TopCenter)
                 .fillMaxWidth()
-                .height(height - blurBand)
+                .height(solidHeight)
+                .background(if (dark) Color.Black else Color.White),
+        )
+        // 标题区与模糊带的交界处做 16dp 渐变，避免出现硬边
+        Box(
+            Modifier
+                .align(androidx.compose.ui.Alignment.TopCenter)
+                .offset(y = solidHeight)
+                .fillMaxWidth()
+                .height(16.dp)
                 .background(
                     Brush.verticalGradient(
-                        0f to (if (dark) Color.Black.copy(alpha = 0.92f) else Color.White.copy(alpha = 0.92f)),
-                        1f to (if (dark) Color.Black.copy(alpha = 0f) else Color.White.copy(alpha = 0f)),
+                        listOf(
+                            if (dark) Color.Black else Color.White,
+                            if (dark) Color.Black.copy(alpha = 0f) else Color.White.copy(alpha = 0f),
+                        ),
                     ),
                 ),
         )

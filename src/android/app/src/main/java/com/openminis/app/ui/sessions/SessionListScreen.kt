@@ -1052,7 +1052,7 @@ fun SessionListScreen(
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                                top = 96.dp,   // [GLASS] 与顶栏（含渐变带）对齐，避免下方出现空档
+                                top = 112.dp,  // [GLASS] 让出"不透明标题区"的高度，模糊带仍与首行重叠
                                 bottom = 96.dp,
                             ),
                         ) {
@@ -1463,7 +1463,9 @@ fun SessionListScreen(
                 // [GLASS] 液态玻璃顶栏：采样页面内容 + 边缘折射 + 0.5dp 高光 + 垂直渐隐。
                 // （Haze 那版在真机上完全没渲染，已弃用）
                 GlassLiquidBar(
-                    height = 132.dp,
+                    height = 184.dp,
+                    solidHeight = 112.dp,   // 状态栏 + 标题：整块不透明
+                    blurBand = 72.dp,       // 只有这条带子做模糊
                     blurRadius = 8.dp,
                     refractionHeight = 24.dp,
                     refractionAmount = 24.dp,
@@ -1951,7 +1953,7 @@ private fun DualFabRow(
                     ),
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Forum, contentDescription = "New Chat", tint = Color.White, modifier = Modifier.size(24.dp))
+                    Icon(Icons.Outlined.Forum, contentDescription = "New Chat", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
                 }
             }
             }

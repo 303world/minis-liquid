@@ -166,6 +166,7 @@ fun UnifiedModelPickerSheet(
     val cardShape = RoundedCornerShape(14.dp)
 
     ModalBottomSheet(
+        containerColor = com.openminis.app.ui.glass.glassSheetColor(),  // [GLASS]
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         // Slim drag handle, same as the main picker / StandardChatSheet — the
@@ -177,6 +178,8 @@ fun UnifiedModelPickerSheet(
                     .padding(top = 6.dp, bottom = 4.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
+                // [GLASS] 独立窗口：系统级背景模糊
+                com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
                 Box(
                     modifier = Modifier
                         .width(32.dp)

@@ -97,6 +97,20 @@ jobs:
       - name: Rebuild rclone.aar
         run: bash scripts/glass/build-rclone-aar.sh "${{ inputs.upstream_version || '1.15' }}"
 
+      # [GLASS] 固定签名：没有它每次构建都是新密钥，用户永远只能卸载重装。
+      - name: Set up stable signing
+        if: ${{ secrets.GLASS_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.GLASS_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/minisglass.jks"
+          test -s "$RUNNER_TEMP/minisglass.jks"
+          {
+            echo "MINIS_GLASS_KEYSTORE=$RUNNER_TEMP/minisglass.jks"
+            echo "MINIS_GLASS_STORE_PASSWORD=${{ secrets.GLASS_STORE_PASSWORD }}"
+            echo "MINIS_GLASS_KEY_ALIAS=${{ secrets.GLASS_KEY_ALIAS }}"
+            echo "MINIS_GLASS_KEY_PASSWORD=${{ secrets.GLASS_KEY_PASSWORD }}"
+          } >> "$GITHUB_ENV"
+          echo "keystore ready: $(ls -l "$RUNNER_TEMP/minisglass.jks" | awk '{print $5}') bytes"
+
       - name: Assemble
         working-directory: src/android
         # 上游 gradle.properties 只给了 Gradle 守护进程 2GB（为开发机保守设置），

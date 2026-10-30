@@ -112,9 +112,29 @@ android {
         }
     }
 
+    // [GLASS] 固定签名。上游用的是 AGP 自动生成的 debug 密钥 —— 每台机器（以及
+    // 每次 CI）都会生成新的，导致同包名的新包装不上去（INSTALL_FAILED_UPDATE_INCOMPATIBLE）。
+    // 这里在读得到 CI secrets 时统一用同一把钥匙：debug / perf / release 三个
+    // buildType 共用，从此可以一直覆盖安装。
+    // 本机没有这些环境变量时自动回退到 AGP 的 debug 密钥，不影响开发。
+    signingConfigs {
+        val glassKeystore = System.getenv("MINIS_GLASS_KEYSTORE")
+        if (!glassKeystore.isNullOrBlank()) {
+            create("minisglass") {
+                storeFile = file(glassKeystore)
+                storePassword = System.getenv("MINIS_GLASS_STORE_PASSWORD")
+                keyAlias = System.getenv("MINIS_GLASS_KEY_ALIAS")
+                keyPassword = System.getenv("MINIS_GLASS_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             buildConfigField("boolean", "DEV_TOOLS", "true")
+            // [GLASS] debug 包也要能覆盖安装（我们发布的就是 githubDebug）
+            signingConfig = signingConfigs.findByName("minisglass")
+                ?: signingConfigs.getByName("debug")
         }
         // `perf`: the debug variant minus android:debuggable. ART refuses to
         // AOT-compile a debuggable app (`cmd package compile -m speed`
@@ -131,7 +151,8 @@ android {
             isProfileable = true
             matchingFallbacks += listOf("debug")
             buildConfigField("boolean", "DEV_TOOLS", "true")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("minisglass")
+                ?: signingConfigs.getByName("debug")
         }
         release {
             // [OpenMinis#363] Produce native-debug-symbols.zip alongside the
@@ -153,7 +174,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("minisglass")
+                ?: signingConfigs.getByName("debug")
         }
     }
 

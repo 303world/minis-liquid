@@ -43,6 +43,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -104,6 +105,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
+import app.minis.glass.GlassSurface
+import app.minis.glass.token.GlassTokens
+import com.openminis.app.ui.glass.GlassWallpaper
+import com.openminis.app.ui.glass.MinisGlassHost
 import com.openminis.app.ui.components.MinisAlertDialog
 import com.openminis.app.ui.components.MinisOutlinedButton
 import com.openminis.app.ui.components.MinisMenu
@@ -968,622 +973,647 @@ fun SessionListScreen(
         .homeBadgeCount(scheduledTaskCount, showScheduledBadge)
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    if (isSelecting) {
-                        Text(
-                            if (selectedIds.isEmpty())
-                                stringResource(R.string.sessionlist_select_title)
-                            else
-                                stringResource(R.string.sessionlist_n_selected, selectedIds.size),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                        )
-                    } else {
-                        Column {
-                            Text(
-                                stringResource(R.string.app_name),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                            )
-                            // [FEAT-261021-07] Tailscale / proxy state; nothing when neither is set up.
-                            NetworkStatusBadges(onOpen = onNetworkPageClick)
-                        }
-                    }
-                },
-                navigationIcon = {
-                    if (isSelecting) {
-                        MinisTextButton(onClick = { viewModel.clearSelection() }) {
-                            Text(stringResource(R.string.cancel))
-                        }
-                    } else {
-                        // [T-update-channels] Beta only: the update badge's
-                        // third layer, derived - no state of its own.
-                        val updateBadge by com.openminis.app.data.UpdateStateStore.hasUpdateBadge.collectAsState()
-                        val updateChannel by com.openminis.app.data.UpdateStateStore.channel.collectAsState()
-                        // [T-android-badge-clip] Badge outside the button's clip.
-                        com.openminis.app.ui.components.BadgedIconButton(
-                            onClick = onSettingsClick,
-                            badge = if (com.openminis.app.data.UpdatePolicy.hasHomeBadge(updateBadge, updateChannel)) {
-                                { Badge() }
-                            } else {
-                                null
-                            },
-                        ) {
-                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.sessionlist_settings))
-                        }
-                    }
-                },
-                actions = {
-                    if (isSelecting) {
-                        // [FIX-261025-07] Counts against the rows the list shows
-                        // (search results during a search), as toggleSelectAll does.
-                        val allSelected = allShownSelected(selectedIds, persistedSessions.mapTo(HashSet()) { it.id })
-                        MinisTextButton(onClick = { viewModel.toggleSelectAll() }) {
-                            Text(
-                                stringResource(
-                                    if (allSelected) R.string.sessionlist_deselect_all
-                                    else R.string.sessionlist_select_all
-                                )
-                            )
-                        }
-                    } else {
-                        // [T-android-scheduled-tasks-design] Scheduled-tasks entry,
-                        // sits to the left of the Shell button on the home toolbar.
-                        // [T-android-scheduled-tasks-full] Badge shows the count of
-                        // scheduled tasks so the user can see at a glance how many
-                        // are configured without opening the list.
-                        // [T-android-badge-clip] The count badge used to sit INSIDE
-                        // the IconButton, whose 40dp circle clip cut off its
-                        // top-right corner; BadgedIconButton keeps it outside.
-                        com.openminis.app.ui.components.BadgedIconButton(
-                            onClick = onScheduledTasksClick,
-                            badge = scheduledBadgeCount?.let { n ->
-                                { Badge { Text("$n") } }
-                            },
-                        ) {
-                            Icon(
-                                Icons.Outlined.Schedule,
-                                contentDescription = stringResource(R.string.sessionlist_scheduled_tasks),
-                            )
-                        }
-                        // Shell menu (matching iOS trailing shell button: Terminal, Rootfs, Browser)
-                        Box {
-                            IconButton(onClick = { showOverflowMenu = true }) {
-                                Icon(Icons.Outlined.Terminal, contentDescription = stringResource(R.string.sessionlist_shell))
-                            }
-                            MinisMenu(
-                                expanded = showOverflowMenu,
-                                onDismissRequest = { showOverflowMenu = false },
-                                offset = DpOffset(0.dp, 0.dp),
-                            ) {
-                                if (sessions.isNotEmpty()) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.sessionlist_select_action)) },
-                                        onClick = {
-                                            showOverflowMenu = false
-                                            viewModel.isSelecting.value = true
-                                        },
-                                        leadingIcon = {
-                                            Icon(Icons.Outlined.ChecklistRtl, contentDescription = null)
-                                        },
-                                    )
-                                    MinisMenuDivider()
-                                }
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sessionlist_shell_terminal)) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        onTerminalClick()
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Outlined.Terminal, contentDescription = null)
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sessionlist_rootfs_management)) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        onRootfsClick()
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Outlined.Settings, contentDescription = null)
-                                    },
-                                )
-                                MinisMenuDivider()
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sessionlist_open_browser)) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        browserTabPool.ensureTabForUI()
-                                        showBrowserSheet = true
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Outlined.Language, contentDescription = null)
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sessionlist_browser_settings)) },
-                                    onClick = {
-                                        showOverflowMenu = false
-                                        showBrowserSettings = true
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Outlined.Settings, contentDescription = null)
-                                    },
-                                )
-                            }
-                        }
-                    }
-                },
-            )
-        },
+        topBar = {},   // [GLASS] 顶栏不再由 Scaffold 布局，改由玻璃层覆盖绘制（内容可滚到它下面）
+        // [GLASS] 底色透明：否则玻璃采到的是 Scaffold 自己刷的那层纯色，模糊后毫无变化。
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         // No default FAB — we draw dual FABs manually at bottom
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
-            // Main content — render an empty frame until the first DB
-            // emission lands. Otherwise `sessions.isEmpty()` reads true for
-            // the brief window before Room delivers real data and the
-            // onboarding flashes on top of existing user history. Mirrors
-            // iOS `didInitialLoad` on ContentView. The transition is usually
-            // sub-200ms, so no spinner.
-            if (isInitialLoadComplete) Column(modifier = Modifier.fillMaxSize()) {
-                // [T-search-folder-expand] A folder whose name matched is a result
-                // even with no member: the list shows it rather than "no results".
-                if (sessions.isEmpty() && !(searchResultsActive && folderBlocks.isNotEmpty())) {
-                    if (isSearchActive && searchQuery.isNotBlank()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.search_no_results, searchQuery),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        // [GLASS] 页面级玻璃宿主：content 录进 backdrop，glass 采样它。一页只允许一个。
+        MinisGlassHost(
+            modifier = Modifier.fillMaxSize(),
+            content = {
+            // [GLASS] 极淡层叠渐变：给玻璃提供可采样的色温，肉眼几乎看不出它是渐变。
+            GlassWallpaper()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+            ) {
+                // Main content — render an empty frame until the first DB
+                // emission lands. Otherwise `sessions.isEmpty()` reads true for
+                // the brief window before Room delivers real data and the
+                // onboarding flashes on top of existing user history. Mirrors
+                // iOS `didInitialLoad` on ContentView. The transition is usually
+                // sub-200ms, so no spinner.
+                if (isInitialLoadComplete) Column(modifier = Modifier.fillMaxSize()) {
+                    // [T-search-folder-expand] A folder whose name matched is a result
+                    // even with no member: the list shows it rather than "no results".
+                    if (sessions.isEmpty() && !(searchResultsActive && folderBlocks.isNotEmpty())) {
+                        if (isSearchActive && searchQuery.isNotBlank()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.search_no_results, searchQuery),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        } else if (configLoaded) {
+                            // Show the 3-step onboarding whenever there are no sessions —
+                            // Step 3 (Start a Conversation) is the call-to-action after the
+                            // user finishes Steps 1 and 2, so we must keep the landing
+                            // visible even when hasProviders && hasGroups. Mirrors iOS
+                            // ContentView.emptyState.
+                            // [T-android-startup-config-stall] Gated on configLoaded so
+                            // hasProviders/hasGroups reflect the real persisted config —
+                            // otherwise a returning user with providers but no sessions
+                            // would briefly see the "add a provider" step before the
+                            // async config load emits. The list branch (sessions present)
+                            // is intentionally NOT gated, so users with history still see
+                            // it immediately without waiting on the config decode.
+                            OnboardingLanding(
+                                hasProviders = hasProviders,
+                                hasGroups = hasGroups,
+                                onAddProvider = onAddProviderClick,
+                                onSelectModels = onSelectModelsClick,
+                                onRestoreBackup = onRestoreBackupClick,
+                                onStartConversation = {
+                                    scope.launch {
+                                        val sessionId = viewModel.createNewSession()
+                                        if (sessionId != null) onNewChatGuarded(sessionId)
+                                    }
+                                },
                             )
                         }
-                    } else if (configLoaded) {
-                        // Show the 3-step onboarding whenever there are no sessions —
-                        // Step 3 (Start a Conversation) is the call-to-action after the
-                        // user finishes Steps 1 and 2, so we must keep the landing
-                        // visible even when hasProviders && hasGroups. Mirrors iOS
-                        // ContentView.emptyState.
-                        // [T-android-startup-config-stall] Gated on configLoaded so
-                        // hasProviders/hasGroups reflect the real persisted config —
-                        // otherwise a returning user with providers but no sessions
-                        // would briefly see the "add a provider" step before the
-                        // async config load emits. The list branch (sessions present)
-                        // is intentionally NOT gated, so users with history still see
-                        // it immediately without waiting on the config decode.
-                        OnboardingLanding(
-                            hasProviders = hasProviders,
-                            hasGroups = hasGroups,
-                            onAddProvider = onAddProviderClick,
-                            onSelectModels = onSelectModelsClick,
-                            onRestoreBackup = onRestoreBackupClick,
-                            onStartConversation = {
-                                scope.launch {
-                                    val sessionId = viewModel.createNewSession()
-                                    if (sessionId != null) onNewChatGuarded(sessionId)
-                                }
-                            },
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        // [T-android-newchat-list-autoscroll] Hoisted state so
-                        // the new-session autoscroll effect above can drive it.
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        // Leave space for bottom FAB row
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
-                    ) {
-                        // T25: search-active path used to flatten the list and skip
-                        // section headers entirely. Now reuses the same grouped
-                        // rendering — `displayedSessions` is already filtered by
-                        // the VM when active && query.isNotBlank, so the same
-                        // groupSessionsByDate(sessions) computation produces
-                        // header buckets over the filtered set.
-                        // [T-android-session-grouping] Assembly: Pinned →
-                        // groups → date buckets — pinnedFirst / leading /
-                        // trailing are hoisted above the LazyColumn so the
-                        // accordion anchor + mini-bar share them; keep the
-                        // builder and folderHeaderIndices in lockstep.
-
-                        // [T-android-session-grouping] Membership is "points at a
-                        // group that exists", matching partitionByFolder. Hoisted
-                        // out of the row so it is not rebuilt per item.
-                        val existingFolderIds = folders.mapTo(HashSet()) { it.id }
-
-                        fun androidx.compose.foundation.lazy.LazyListScope.renderSessionRows(
-                            rows: List<ChatSessionEntity>,
-                            // [T-android-folder-card-ios-parity] Folder members
-                            // render as MIDDLE/BOTTOM segments of the group's
-                            // welded container (iOS FolderMemberRowBackground);
-                            // ungrouped rows stay full-bleed.
-                            inFolder: Boolean = false,
-                            // [T-folder-pages] False while a "Show N more" row
-                            // follows: that row is the container's bottom then.
-                            closesFolder: Boolean = true,
+                    } else {
+                        LazyColumn(
+                            // [T-android-newchat-list-autoscroll] Hoisted state so
+                            // the new-session autoscroll effect above can drive it.
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            // Leave space for bottom FAB row
+                            // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                top = 64.dp,
+                                bottom = 96.dp,
+                            ),
                         ) {
-                            items(rows, key = { it.id }) { session ->
-                                val activeQuery =
-                                    if (isSearchActive && searchQuery.isNotBlank()) searchQuery else ""
-                                val rowModifier = if (inFolder) {
-                                    val isLast = closesFolder && session.id == rows.last().id
-                                    Modifier
-                                        .padding(
-                                            start = LIST_GUTTER, end = LIST_GUTTER,
-                                            bottom = if (isLast) 4.dp else 0.dp,
-                                        )
-                                        .folderSurface(
-                                            segment = if (isLast) FolderSegment.BOTTOM
-                                            else FolderSegment.MIDDLE,
-                                            fill = folderFillColor(),
-                                            edge = folderEdgeColor(),
-                                        )
-                                        // AFTER folderSurface so the drawn
-                                        // fill/border stay outside the clip;
-                                        // inside it, the row's press ripple is
-                                        // shaped to the segment — square for
-                                        // middles, bottom-rounded on the last
-                                        // row so the highlight can't poke out
-                                        // of the container's corners.
-                                        .clip(
-                                            if (isLast) {
-                                                RoundedCornerShape(
-                                                    bottomStart = 16.dp, bottomEnd = 16.dp,
-                                                )
-                                            } else {
-                                                RoundedCornerShape(0.dp)
-                                            },
-                                        )
-                                } else {
-                                    Modifier
-                                }
-                                // animateItem gives the accordion its motion:
-                                // member rows fade+slide over 250ms instead of
-                                // popping — the iOS easeInOut(0.25) equivalent
-                                // (monotonic tween on purpose; a spring's
-                                // oscillation read as jitter on iOS).
-                                Box(
-                                    modifier = Modifier
-                                        .animateItem(
-                                            fadeInSpec = tween(250),
-                                            fadeOutSpec = tween(250),
-                                            placementSpec = tween(250),
-                                        )
-                                        .then(rowModifier),
-                                ) {
-                                SessionItemContent(
-                                    session = session,
-                                    isSelecting = isSelecting,
-                                    selectedIds = selectedIds,
-                                    onSessionClick = onSessionClickGuarded,
-                                    onToggleSelect = { viewModel.toggleSelect(it) },
-                                    onEnterSelect = { viewModel.enterSelection(it) },
-                                    onPinToggle = { viewModel.togglePin(it) },
-                                    onEditRequest = { editSession = it },
-                                    onExportRequest = { s, fmt ->
-                                        exportSession(context, s, chatRepository, scope, fmt)
-                                    },
-                                    onRegenerateTitle = { viewModel.regenerateTitle(it) },
-                                    onDuplicate = { viewModel.duplicateSession(it) },
-                                    onDeleteRequest = { id ->
-                                        deleteTargetId = id
-                                        showDeleteDialog = true
-                                    },
-                                    onMoveToGroup = { viewModel.requestGroupPicker(it) },
-                                    isFiled = session.folderId != null &&
-                                        session.folderId in existingFolderIds,
-                                    isRegenerating = session.id in regeneratingIds,
-                                    searchQuery = activeQuery,
-                                    searchSnippet = searchSnippets[session.id],
-                                    // Transparent so the folder container's
-                                    // surface shows through member rows.
-                                    //
-                                    // [T-android-tablet-split] In two-pane mode
-                                    // the row backing the detail pane is tinted,
-                                    // giving the list the selected-row look iOS
-                                    // gets free from `List(selection:)`.
-                                    // primary@12% is the same treatment the
-                                    // mention picker uses for its highlighted
-                                    // row, so selection reads consistently.
-                                    // Ordering matters: the folder-member case
-                                    // stays transparent unless it is ALSO the
-                                    // selected row, or a selected row inside a
-                                    // group would show no highlight at all.
-                                    rowBackground = when {
-                                        session.id == selectedSessionId ->
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                        inFolder -> Color.Transparent
-                                        else -> null
-                                    },
-                                    isFolderMember = inFolder,
-                                )
-                                }
-                            }
-                        }
+                            // T25: search-active path used to flatten the list and skip
+                            // section headers entirely. Now reuses the same grouped
+                            // rendering — `displayedSessions` is already filtered by
+                            // the VM when active && query.isNotBlank, so the same
+                            // groupSessionsByDate(sessions) computation produces
+                            // header buckets over the filtered set.
+                            // [T-android-session-grouping] Assembly: Pinned →
+                            // groups → date buckets — pinnedFirst / leading /
+                            // trailing are hoisted above the LazyColumn so the
+                            // accordion anchor + mini-bar share them; keep the
+                            // builder and folderHeaderIndices in lockstep.
 
-                        leadingDateGroups.forEach { (period, periodSessions) ->
-                            item(key = "header_${period.name}") {
-                                SectionHeader(title = stringResource(R.string.sessionlist_section_pinned))
-                            }
-                            renderSessionRows(periodSessions)
-                        }
+                            // [T-android-session-grouping] Membership is "points at a
+                            // group that exists", matching partitionByFolder. Hoisted
+                            // out of the row so it is not rebuilt per item.
+                            val existingFolderIds = folders.mapTo(HashSet()) { it.id }
 
-                        if (folderBlocks.isNotEmpty()) {
-                            item(key = "header_groups") {
-                                SectionHeader(title = stringResource(R.string.group_section_header))
-                            }
-                            folderBlocks.forEach { block ->
-                                item(key = "folder_${block.folder.id}") {
-                                    Box(Modifier.animateItem(placementSpec = tween(250))) {
-                                    FolderCard(
-                                        block = block,
-                                        searchQuery = if (searchResultsActive) searchQuery else null,
-                                        onToggle = {
-                                            // [T-search-folder-collapse] In a result set the tap
-                                            // folds this folder for this search only: the saved
-                                            // open folder is left alone (nothing is persisted)
-                                            // and there is no accordion, so other results stay open.
-                                            if (searchResultsActive) {
-                                                viewModel.toggleSearchFolderCollapsed(block.folder.id)
-                                                return@FolderCard
-                                            }
-                                            // Capture BEFORE the toggle — after it
-                                            // the block still holds the old state.
-                                            val willExpand = block.isCollapsed
-                                            viewModel.toggleFolderCollapsed(block.folder.id)
-                                            if (willExpand) {
-                                                pendingExpandFolderId = block.folder.id
-                                            }
-                                        },
-                                        onTogglePin = { viewModel.toggleFolderPin(block.folder.id) },
-                                        onRename = { folderToRename = block.folder },
-                                        onDissolve = { folderToDissolve = block.folder },
-                                        onNewChatInGroup = {
-                                            // iOS newChatInFolder: auto-expand
-                                            // first so the new session doesn't
-                                            // vanish into a collapsed group.
-                                            // [T-search-folder-collapse] In a result set only
-                                            // reopen a folder the user folded there.
-                                            if (searchResultsActive) {
-                                                viewModel.reopenSearchFolder(block.folder.id)
-                                            } else if (block.isCollapsed) {
-                                                viewModel.toggleFolderCollapsed(block.folder.id)
-                                            }
-                                            val sessionId = viewModel.createNewSession(
-                                                folderId = block.folder.id,
+                            fun androidx.compose.foundation.lazy.LazyListScope.renderSessionRows(
+                                rows: List<ChatSessionEntity>,
+                                // [T-android-folder-card-ios-parity] Folder members
+                                // render as MIDDLE/BOTTOM segments of the group's
+                                // welded container (iOS FolderMemberRowBackground);
+                                // ungrouped rows stay full-bleed.
+                                inFolder: Boolean = false,
+                                // [T-folder-pages] False while a "Show N more" row
+                                // follows: that row is the container's bottom then.
+                                closesFolder: Boolean = true,
+                            ) {
+                                items(rows, key = { it.id }) { session ->
+                                    val activeQuery =
+                                        if (isSearchActive && searchQuery.isNotBlank()) searchQuery else ""
+                                    val rowModifier = if (inFolder) {
+                                        val isLast = closesFolder && session.id == rows.last().id
+                                        Modifier
+                                            .padding(
+                                                start = LIST_GUTTER, end = LIST_GUTTER,
+                                                bottom = if (isLast) 4.dp else 0.dp,
                                             )
-                                            if (sessionId != null) onNewChatGuarded(sessionId)
-                                        },
-                                        onDeleteWithSessions = {
-                                            folderToDelete = block.folder to block.totalCount
-                                        },
-                                    )
-                                    }
-                                }
-                                // Collapsed groups contribute no rows; the card
-                                // still reports the real member count.
-                                renderSessionRows(
-                                    block.ids.mapNotNull { id -> sessions.firstOrNull { it.id == id } },
-                                    inFolder = true,
-                                    closesFolder = block.hiddenCount == 0,
-                                )
-                                // [T-folder-pages] The rest, a page per tap.
-                                if (block.hiddenCount > 0) {
-                                    item(key = "folder_more_${block.folder.id}") {
-                                        Box(Modifier.animateItem(placementSpec = tween(250))) {
-                                            FolderShowMoreRow(
-                                                hidden = block.hiddenCount,
-                                                onClick = {
-                                                    if (searchResultsActive) {
-                                                        viewModel.showMoreInSearchFolder(block.folder.id, block.pagesShown)
-                                                    } else {
-                                                        viewModel.showMoreInFolder(block.folder.id, block.pagesShown)
-                                                    }
+                                            .folderSurface(
+                                                segment = if (isLast) FolderSegment.BOTTOM
+                                                else FolderSegment.MIDDLE,
+                                                fill = folderFillColor(),
+                                                edge = folderEdgeColor(),
+                                            )
+                                            // AFTER folderSurface so the drawn
+                                            // fill/border stay outside the clip;
+                                            // inside it, the row's press ripple is
+                                            // shaped to the segment — square for
+                                            // middles, bottom-rounded on the last
+                                            // row so the highlight can't poke out
+                                            // of the container's corners.
+                                            .clip(
+                                                if (isLast) {
+                                                    RoundedCornerShape(
+                                                        bottomStart = 16.dp, bottomEnd = 16.dp,
+                                                    )
+                                                } else {
+                                                    RoundedCornerShape(0.dp)
                                                 },
                                             )
+                                    } else {
+                                        Modifier
+                                    }
+                                    // animateItem gives the accordion its motion:
+                                    // member rows fade+slide over 250ms instead of
+                                    // popping — the iOS easeInOut(0.25) equivalent
+                                    // (monotonic tween on purpose; a spring's
+                                    // oscillation read as jitter on iOS).
+                                    Box(
+                                        modifier = Modifier
+                                            .animateItem(
+                                                fadeInSpec = tween(250),
+                                                fadeOutSpec = tween(250),
+                                                placementSpec = tween(250),
+                                            )
+                                            .then(rowModifier),
+                                    ) {
+                                    SessionItemContent(
+                                        session = session,
+                                        isSelecting = isSelecting,
+                                        selectedIds = selectedIds,
+                                        onSessionClick = onSessionClickGuarded,
+                                        onToggleSelect = { viewModel.toggleSelect(it) },
+                                        onEnterSelect = { viewModel.enterSelection(it) },
+                                        onPinToggle = { viewModel.togglePin(it) },
+                                        onEditRequest = { editSession = it },
+                                        onExportRequest = { s, fmt ->
+                                            exportSession(context, s, chatRepository, scope, fmt)
+                                        },
+                                        onRegenerateTitle = { viewModel.regenerateTitle(it) },
+                                        onDuplicate = { viewModel.duplicateSession(it) },
+                                        onDeleteRequest = { id ->
+                                            deleteTargetId = id
+                                            showDeleteDialog = true
+                                        },
+                                        onMoveToGroup = { viewModel.requestGroupPicker(it) },
+                                        isFiled = session.folderId != null &&
+                                            session.folderId in existingFolderIds,
+                                        isRegenerating = session.id in regeneratingIds,
+                                        searchQuery = activeQuery,
+                                        searchSnippet = searchSnippets[session.id],
+                                        // Transparent so the folder container's
+                                        // surface shows through member rows.
+                                        //
+                                        // [T-android-tablet-split] In two-pane mode
+                                        // the row backing the detail pane is tinted,
+                                        // giving the list the selected-row look iOS
+                                        // gets free from `List(selection:)`.
+                                        // primary@12% is the same treatment the
+                                        // mention picker uses for its highlighted
+                                        // row, so selection reads consistently.
+                                        // Ordering matters: the folder-member case
+                                        // stays transparent unless it is ALSO the
+                                        // selected row, or a selected row inside a
+                                        // group would show no highlight at all.
+                                        rowBackground = when {
+                                            session.id == selectedSessionId ->
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                            inFolder -> Color.Transparent
+                                            else -> null
+                                        },
+                                        isFolderMember = inFolder,
+                                    )
+                                    }
+                                }
+                            }
+
+                            leadingDateGroups.forEach { (period, periodSessions) ->
+                                item(key = "header_${period.name}") {
+                                    SectionHeader(title = stringResource(R.string.sessionlist_section_pinned))
+                                }
+                                renderSessionRows(periodSessions)
+                            }
+
+                            if (folderBlocks.isNotEmpty()) {
+                                item(key = "header_groups") {
+                                    SectionHeader(title = stringResource(R.string.group_section_header))
+                                }
+                                folderBlocks.forEach { block ->
+                                    item(key = "folder_${block.folder.id}") {
+                                        Box(Modifier.animateItem(placementSpec = tween(250))) {
+                                        FolderCard(
+                                            block = block,
+                                            searchQuery = if (searchResultsActive) searchQuery else null,
+                                            onToggle = {
+                                                // [T-search-folder-collapse] In a result set the tap
+                                                // folds this folder for this search only: the saved
+                                                // open folder is left alone (nothing is persisted)
+                                                // and there is no accordion, so other results stay open.
+                                                if (searchResultsActive) {
+                                                    viewModel.toggleSearchFolderCollapsed(block.folder.id)
+                                                    return@FolderCard
+                                                }
+                                                // Capture BEFORE the toggle — after it
+                                                // the block still holds the old state.
+                                                val willExpand = block.isCollapsed
+                                                viewModel.toggleFolderCollapsed(block.folder.id)
+                                                if (willExpand) {
+                                                    pendingExpandFolderId = block.folder.id
+                                                }
+                                            },
+                                            onTogglePin = { viewModel.toggleFolderPin(block.folder.id) },
+                                            onRename = { folderToRename = block.folder },
+                                            onDissolve = { folderToDissolve = block.folder },
+                                            onNewChatInGroup = {
+                                                // iOS newChatInFolder: auto-expand
+                                                // first so the new session doesn't
+                                                // vanish into a collapsed group.
+                                                // [T-search-folder-collapse] In a result set only
+                                                // reopen a folder the user folded there.
+                                                if (searchResultsActive) {
+                                                    viewModel.reopenSearchFolder(block.folder.id)
+                                                } else if (block.isCollapsed) {
+                                                    viewModel.toggleFolderCollapsed(block.folder.id)
+                                                }
+                                                val sessionId = viewModel.createNewSession(
+                                                    folderId = block.folder.id,
+                                                )
+                                                if (sessionId != null) onNewChatGuarded(sessionId)
+                                            },
+                                            onDeleteWithSessions = {
+                                                folderToDelete = block.folder to block.totalCount
+                                            },
+                                        )
+                                        }
+                                    }
+                                    // Collapsed groups contribute no rows; the card
+                                    // still reports the real member count.
+                                    renderSessionRows(
+                                        block.ids.mapNotNull { id -> sessions.firstOrNull { it.id == id } },
+                                        inFolder = true,
+                                        closesFolder = block.hiddenCount == 0,
+                                    )
+                                    // [T-folder-pages] The rest, a page per tap.
+                                    if (block.hiddenCount > 0) {
+                                        item(key = "folder_more_${block.folder.id}") {
+                                            Box(Modifier.animateItem(placementSpec = tween(250))) {
+                                                FolderShowMoreRow(
+                                                    hidden = block.hiddenCount,
+                                                    onClick = {
+                                                        if (searchResultsActive) {
+                                                            viewModel.showMoreInSearchFolder(block.folder.id, block.pagesShown)
+                                                        } else {
+                                                            viewModel.showMoreInFolder(block.folder.id, block.pagesShown)
+                                                        }
+                                                    },
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        trailingDateGroups.forEach { (period, periodSessions) ->
-                            item(key = "header_${period.name}") {
-                                SectionHeader(title = stringResource(when (period) {
-                                    DatePeriod.PINNED -> R.string.sessionlist_section_pinned
-                                    DatePeriod.TODAY -> R.string.sessionlist_section_today
-                                    DatePeriod.YESTERDAY -> R.string.sessionlist_section_yesterday
-                                    DatePeriod.THIS_WEEK -> R.string.sessionlist_section_this_week
-                                    DatePeriod.THIS_MONTH -> R.string.sessionlist_section_this_month
-                                    DatePeriod.EARLIER -> R.string.sessionlist_section_earlier
-                                }))
+                            trailingDateGroups.forEach { (period, periodSessions) ->
+                                item(key = "header_${period.name}") {
+                                    SectionHeader(title = stringResource(when (period) {
+                                        DatePeriod.PINNED -> R.string.sessionlist_section_pinned
+                                        DatePeriod.TODAY -> R.string.sessionlist_section_today
+                                        DatePeriod.YESTERDAY -> R.string.sessionlist_section_yesterday
+                                        DatePeriod.THIS_WEEK -> R.string.sessionlist_section_this_week
+                                        DatePeriod.THIS_MONTH -> R.string.sessionlist_section_this_month
+                                        DatePeriod.EARLIER -> R.string.sessionlist_section_earlier
+                                    }))
+                                }
+                                renderSessionRows(periodSessions)
                             }
-                            renderSessionRows(periodSessions)
                         }
                     }
                 }
-            }
 
-            // [T-android-folder-minibar] Floating quick-nav capsule (iOS
-            // folderMiniBar): appears when the expanded group's header scrolls
-            // off the top. Two interaction zones — icon+name jumps back to the
-            // header, the circled chevron collapses the group. Split on
-            // purpose: whole-bar-collapses made "where am I" and "close this"
-            // the same target.
-            run {
-                var lastBar by remember { mutableStateOf<FolderGroupBlock?>(null) }
-                miniBarBlock?.let { lastBar = it }
-                val bar = lastBar
-                AnimatedVisibility(
-                    visible = miniBarBlock != null,
-                    enter = slideInVertically(tween(200)) { -it } + fadeIn(tween(200)),
-                    exit = slideOutVertically(tween(200)) { -it } + fadeOut(tween(200)),
-                    modifier = Modifier.align(Alignment.TopCenter),
-                ) {
-                    if (bar != null) {
-                        val headerIdx = folderHeaderIndices[bar.folder.id]
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(top = 8.dp, start = 24.dp, end = 24.dp)
-                                .widthIn(max = 320.dp)
-                                .height(48.dp)
-                                .shadow(8.dp, RoundedCornerShape(24.dp))
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                .border(
-                                    0.5.dp,
-                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                    RoundedCornerShape(24.dp),
-                                )
-                                .padding(start = 10.dp, end = 8.dp),
-                        ) {
+                // [T-android-folder-minibar] Floating quick-nav capsule (iOS
+                // folderMiniBar): appears when the expanded group's header scrolls
+                // off the top. Two interaction zones — icon+name jumps back to the
+                // header, the circled chevron collapses the group. Split on
+                // purpose: whole-bar-collapses made "where am I" and "close this"
+                // the same target.
+                run {
+                    var lastBar by remember { mutableStateOf<FolderGroupBlock?>(null) }
+                    miniBarBlock?.let { lastBar = it }
+                    val bar = lastBar
+                    AnimatedVisibility(
+                        visible = miniBarBlock != null,
+                        enter = slideInVertically(tween(200)) { -it } + fadeIn(tween(200)),
+                        exit = slideOutVertically(tween(200)) { -it } + fadeOut(tween(200)),
+                        modifier = Modifier.align(Alignment.TopCenter),
+                    ) {
+                        if (bar != null) {
+                            val headerIdx = folderHeaderIndices[bar.folder.id]
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .clickable(enabled = headerIdx != null) {
-                                        scope.launch {
-                                            headerIdx?.let { listState.animateScrollToItem(it) }
-                                        }
-                                    },
-                            ) {
-                                // The mini-bar stands in for the header, so it
-                                // shows the comet like a closed group.
-                                FolderMemberTile(
-                                    members = bar.tileMembers,
-                                    size = 30.dp,
-                                    loadingColor = if (bar.anyActive) groupLoadingColor(bar.activeCategory) else null,
-                                )
-                                // Folder names are user data — verbatim.
-                                Text(
-                                    bar.folder.name,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                    .padding(top = 8.dp, start = 24.dp, end = 24.dp)
+                                    .widthIn(max = 320.dp)
+                                    .height(48.dp)
+                                    .shadow(8.dp, RoundedCornerShape(24.dp))
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                    .border(
+                                        0.5.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                        RoundedCornerShape(24.dp),
                                     )
-                                    .clickable {
-                                        // [T-search-folder-collapse] In a result set the
-                                        // fold is for this search only.
-                                        if (searchResultsActive) viewModel.toggleSearchFolderCollapsed(bar.folder.id)
-                                        else viewModel.toggleFolderCollapsed(bar.folder.id)
-                                    },
+                                    .padding(start = 10.dp, end = 8.dp),
                             ) {
-                                Icon(
-                                    Icons.Default.KeyboardArrowUp,
-                                    contentDescription = stringResource(R.string.group_collapse),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp),
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .clickable(enabled = headerIdx != null) {
+                                            scope.launch {
+                                                headerIdx?.let { listState.animateScrollToItem(it) }
+                                            }
+                                        },
+                                ) {
+                                    // The mini-bar stands in for the header, so it
+                                    // shows the comet like a closed group.
+                                    FolderMemberTile(
+                                        members = bar.tileMembers,
+                                        size = 30.dp,
+                                        loadingColor = if (bar.anyActive) groupLoadingColor(bar.activeCategory) else null,
+                                    )
+                                    // Folder names are user data — verbatim.
+                                    Text(
+                                        bar.folder.name,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                        )
+                                        .clickable {
+                                            // [T-search-folder-collapse] In a result set the
+                                            // fold is for this search only.
+                                            if (searchResultsActive) viewModel.toggleSearchFolderCollapsed(bar.folder.id)
+                                            else viewModel.toggleFolderCollapsed(bar.folder.id)
+                                        },
+                                ) {
+                                    Icon(
+                                        Icons.Default.KeyboardArrowUp,
+                                        contentDescription = stringResource(R.string.group_collapse),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Bottom area: dual FABs or selection toolbar (matching iOS fabRow / selectionToolbar)
-            if (isSelecting) {
-                // Selection toolbar at bottom (matching iOS: Export + Delete)
-                SelectionToolbar(
-                    selectedCount = selectedIds.size,
-                    onExport = { format ->
-                        // Displayed order, persisted rows only: the synthetic
-                        // draft row was never written, so it has nothing to export.
-                        val targets = persistedSessions.filter { it.id in selectedIds }
-                        if (targets.isNotEmpty() && multiExportProgress == null) {
-                            multiExportProgress = 0 to 0
-                            scope.launch {
-                                try {
-                                    val result = com.openminis.app.share.SessionExporter.exportToZip(
-                                        context, targets, chatRepository, format,
-                                    ) { done, total ->
-                                        scope.launch { multiExportProgress = done to total }
+                // Bottom area: dual FABs or selection toolbar (matching iOS fabRow / selectionToolbar)
+                if (isSelecting) {
+                    // Selection toolbar at bottom (matching iOS: Export + Delete)
+                    SelectionToolbar(
+                        selectedCount = selectedIds.size,
+                        onExport = { format ->
+                            // Displayed order, persisted rows only: the synthetic
+                            // draft row was never written, so it has nothing to export.
+                            val targets = persistedSessions.filter { it.id in selectedIds }
+                            if (targets.isNotEmpty() && multiExportProgress == null) {
+                                multiExportProgress = 0 to 0
+                                scope.launch {
+                                    try {
+                                        val result = com.openminis.app.share.SessionExporter.exportToZip(
+                                            context, targets, chatRepository, format,
+                                        ) { done, total ->
+                                            scope.launch { multiExportProgress = done to total }
+                                        }
+                                        // iOS shows the summary only for several sessions.
+                                        if (result.sessionCount > 1) multiExportResult = result
+                                        else shareSessionExport(context, result)
+                                    } catch (e: kotlinx.coroutines.CancellationException) {
+                                        throw e
+                                    } catch (t: Throwable) {
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            context.getString(R.string.export_progress_failed),
+                                            android.widget.Toast.LENGTH_LONG,
+                                        ).show()
+                                    } finally {
+                                        multiExportProgress = null
                                     }
-                                    // iOS shows the summary only for several sessions.
-                                    if (result.sessionCount > 1) multiExportResult = result
-                                    else shareSessionExport(context, result)
-                                } catch (e: kotlinx.coroutines.CancellationException) {
-                                    throw e
-                                } catch (t: Throwable) {
-                                    android.widget.Toast.makeText(
-                                        context,
-                                        context.getString(R.string.export_progress_failed),
-                                        android.widget.Toast.LENGTH_LONG,
-                                    ).show()
-                                } finally {
-                                    multiExportProgress = null
                                 }
                             }
-                        }
-                    },
-                    onMove = { viewModel.requestGroupPickerForSelection() },
-                    onDelete = { showBulkDeleteDialog = true },
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
-            } else if (hasProviders && (sessions.isNotEmpty() || isSearchActive)) {
-                // Dual FAB row (matching iOS: New Chat left + Search right, or vice versa).
-                // Hidden while the onboarding landing is showing — Step 3 provides the CTA.
-                // T46: stay visible while search is active even when the result
-                // set is empty, so the user can edit / clear the query without
-                // having to rediscover the search FAB after a 0-hit query.
-                DualFabRow(
-                    isDark = isDark,
-                    isSearchActive = isSearchActive,
-                    searchQuery = searchQuery,
-                    isSearching = isSearching,
-                    hasSessions = sessions.isNotEmpty() || isSearchActive,
-                    onNewChat = {
-                        scope.launch {
-                            val sessionId = viewModel.createNewSession()
-                            if (sessionId != null) onNewChatGuarded(sessionId)
-                        }
-                    },
-                    onNewChatWithGroup = { groupId ->
-                        scope.launch {
-                            val sessionId = viewModel.createNewSession(groupId = groupId)
-                            if (sessionId != null) onNewChatGuarded(sessionId)
-                        }
-                    },
-                    modelGroups = providerConfig.modelGroups,
-                    onSearchToggle = {
-                        if (isSearchActive) {
+                        },
+                        onMove = { viewModel.requestGroupPickerForSelection() },
+                        onDelete = { showBulkDeleteDialog = true },
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                } else if (hasProviders && (sessions.isNotEmpty() || isSearchActive)) {
+                    // Dual FAB row (matching iOS: New Chat left + Search right, or vice versa).
+                    // Hidden while the onboarding landing is showing — Step 3 provides the CTA.
+                    // T46: stay visible while search is active even when the result
+                    // set is empty, so the user can edit / clear the query without
+                    // having to rediscover the search FAB after a 0-hit query.
+                    DualFabRow(
+                        isDark = isDark,
+                        isSearchActive = isSearchActive,
+                        searchQuery = searchQuery,
+                        isSearching = isSearching,
+                        hasSessions = sessions.isNotEmpty() || isSearchActive,
+                        onNewChat = {
+                            scope.launch {
+                                val sessionId = viewModel.createNewSession()
+                                if (sessionId != null) onNewChatGuarded(sessionId)
+                            }
+                        },
+                        onNewChatWithGroup = { groupId ->
+                            scope.launch {
+                                val sessionId = viewModel.createNewSession(groupId = groupId)
+                                if (sessionId != null) onNewChatGuarded(sessionId)
+                            }
+                        },
+                        modelGroups = providerConfig.modelGroups,
+                        onSearchToggle = {
+                            if (isSearchActive) {
+                                viewModel.searchQuery.value = ""
+                                viewModel.isSearchActive.value = false
+                            } else {
+                                viewModel.isSearchActive.value = true
+                            }
+                        },
+                        onSearchQueryChange = { viewModel.searchQuery.value = it },
+                        onSearchDismiss = {
                             viewModel.searchQuery.value = ""
                             viewModel.isSearchActive.value = false
-                        } else {
-                            viewModel.isSearchActive.value = true
-                        }
-                    },
-                    onSearchQueryChange = { viewModel.searchQuery.value = it },
-                    onSearchDismiss = {
-                        viewModel.searchQuery.value = ""
-                        viewModel.isSearchActive.value = false
-                    },
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
+                        },
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                }
             }
-        }
+            },
+            glass = {
+                GlassSurface(
+                    level = GlassTokens.Bar,
+                    shape = RectangleShape,   // 顶栏贴边，不做圆角（与 iOS 导航栏一致）
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TopAppBar(
+                        // [GLASS] 顶栏自身不能刷底色，否则玻璃被盖住看不见。
+                        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                        ),
+                        title = {
+                            if (isSelecting) {
+                                Text(
+                                    if (selectedIds.isEmpty())
+                                        stringResource(R.string.sessionlist_select_title)
+                                    else
+                                        stringResource(R.string.sessionlist_n_selected, selectedIds.size),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                )
+                            } else {
+                                Column {
+                                    Text(
+                                        stringResource(R.string.app_name),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
+                                    )
+                                    // [FEAT-261021-07] Tailscale / proxy state; nothing when neither is set up.
+                                    NetworkStatusBadges(onOpen = onNetworkPageClick)
+                                }
+                            }
+                        },
+                        navigationIcon = {
+                            if (isSelecting) {
+                                MinisTextButton(onClick = { viewModel.clearSelection() }) {
+                                    Text(stringResource(R.string.cancel))
+                                }
+                            } else {
+                                // [T-update-channels] Beta only: the update badge's
+                                // third layer, derived - no state of its own.
+                                val updateBadge by com.openminis.app.data.UpdateStateStore.hasUpdateBadge.collectAsState()
+                                val updateChannel by com.openminis.app.data.UpdateStateStore.channel.collectAsState()
+                                // [T-android-badge-clip] Badge outside the button's clip.
+                                com.openminis.app.ui.components.BadgedIconButton(
+                                    onClick = onSettingsClick,
+                                    badge = if (com.openminis.app.data.UpdatePolicy.hasHomeBadge(updateBadge, updateChannel)) {
+                                        { Badge() }
+                                    } else {
+                                        null
+                                    },
+                                ) {
+                                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.sessionlist_settings))
+                                }
+                            }
+                        },
+                        actions = {
+                            if (isSelecting) {
+                                // [FIX-261025-07] Counts against the rows the list shows
+                                // (search results during a search), as toggleSelectAll does.
+                                val allSelected = allShownSelected(selectedIds, persistedSessions.mapTo(HashSet()) { it.id })
+                                MinisTextButton(onClick = { viewModel.toggleSelectAll() }) {
+                                    Text(
+                                        stringResource(
+                                            if (allSelected) R.string.sessionlist_deselect_all
+                                            else R.string.sessionlist_select_all
+                                        )
+                                    )
+                                }
+                            } else {
+                                // [T-android-scheduled-tasks-design] Scheduled-tasks entry,
+                                // sits to the left of the Shell button on the home toolbar.
+                                // [T-android-scheduled-tasks-full] Badge shows the count of
+                                // scheduled tasks so the user can see at a glance how many
+                                // are configured without opening the list.
+                                // [T-android-badge-clip] The count badge used to sit INSIDE
+                                // the IconButton, whose 40dp circle clip cut off its
+                                // top-right corner; BadgedIconButton keeps it outside.
+                                com.openminis.app.ui.components.BadgedIconButton(
+                                    onClick = onScheduledTasksClick,
+                                    badge = scheduledBadgeCount?.let { n ->
+                                        { Badge { Text("$n") } }
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Schedule,
+                                        contentDescription = stringResource(R.string.sessionlist_scheduled_tasks),
+                                    )
+                                }
+                                // Shell menu (matching iOS trailing shell button: Terminal, Rootfs, Browser)
+                                Box {
+                                    IconButton(onClick = { showOverflowMenu = true }) {
+                                        Icon(Icons.Outlined.Terminal, contentDescription = stringResource(R.string.sessionlist_shell))
+                                    }
+                                    MinisMenu(
+                                        expanded = showOverflowMenu,
+                                        onDismissRequest = { showOverflowMenu = false },
+                                        offset = DpOffset(0.dp, 0.dp),
+                                    ) {
+                                        if (sessions.isNotEmpty()) {
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(R.string.sessionlist_select_action)) },
+                                                onClick = {
+                                                    showOverflowMenu = false
+                                                    viewModel.isSelecting.value = true
+                                                },
+                                                leadingIcon = {
+                                                    Icon(Icons.Outlined.ChecklistRtl, contentDescription = null)
+                                                },
+                                            )
+                                            MinisMenuDivider()
+                                        }
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.sessionlist_shell_terminal)) },
+                                            onClick = {
+                                                showOverflowMenu = false
+                                                onTerminalClick()
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Outlined.Terminal, contentDescription = null)
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.sessionlist_rootfs_management)) },
+                                            onClick = {
+                                                showOverflowMenu = false
+                                                onRootfsClick()
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Outlined.Settings, contentDescription = null)
+                                            },
+                                        )
+                                        MinisMenuDivider()
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.sessionlist_open_browser)) },
+                                            onClick = {
+                                                showOverflowMenu = false
+                                                browserTabPool.ensureTabForUI()
+                                                showBrowserSheet = true
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Outlined.Language, contentDescription = null)
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.sessionlist_browser_settings)) },
+                                            onClick = {
+                                                showOverflowMenu = false
+                                                showBrowserSettings = true
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Outlined.Settings, contentDescription = null)
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+            },
+        )
     }
 
     // Single delete confirmation

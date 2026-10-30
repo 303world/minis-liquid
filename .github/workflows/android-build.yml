@@ -26,6 +26,10 @@ on:
         description: 'Upstream release tag to lift native libs from (e.g. 1.15)'
         required: false
         default: '1.15'
+      publish_release:
+        description: 'Tag to publish this APK as a GitHub Release (e.g. v1.15-liquid.1). Empty = do not publish.'
+        required: false
+        default: ''
 
 concurrency:
   group: build-${{ github.ref }}
@@ -35,6 +39,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: write   # 发布 Release 需要
 
     steps:
       - name: Checkout
@@ -105,6 +111,26 @@ jobs:
             src/android/app/build/outputs/apk/github/**/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      # 让 CI 直接发 Release：省得把 70MB 的包再下回手机（而且 Release 的下载链接
+      # 不需要登录，App 内自更新也能直接读）。只有手动触发且填了 tag 才发。
+      - name: Publish release
+        if: success() && inputs.publish_release != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.publish_release }}
+          name: Minis Liquid ${{ inputs.publish_release }}
+          body: |
+            Minis Liquid 自动构建（上游基线 ${{ inputs.upstream_version || '1.15' }}）。
+
+            包名 `com.openminis.app.glass`，**可与官方 Minis 共存**，不需要卸载官方版。
+
+            本构建为开发预览：界面尚未开始玻璃化改造（M0 阶段，功能与上游一致）。
+          files: |
+            src/android/app/build/outputs/apk/github/**/*.apk
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
 
       - name: Upload build reports on failure
         if: failure()

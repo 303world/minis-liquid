@@ -47,8 +47,9 @@ android {
         minSdk = 26
         targetSdk = 35
         // [GLASS] 版本策略：versionCode = 上游 ×100 + fork 构建号，便于看出上游基线。
-        versionCode = 3701
-        versionName = "1.15-liquid.1"
+        // [GLASS] 首个正式版：1.0（上游基线 1.15 记在名称里）
+        versionCode = 10001
+        versionName = "1.0.0-liquid"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1922,7 +1922,7 @@ private fun DualFabRow(
                 LocalGlassBackdrop provides backdrop,
             ) {
             GlassSurface(
-                level = GlassTokens.Button.copy(tint = GlassTokens.BrandSand),
+                level = GlassTokens.Button,
                 shape = CircleShape,
                 modifier = Modifier
                     .size(56.dp)

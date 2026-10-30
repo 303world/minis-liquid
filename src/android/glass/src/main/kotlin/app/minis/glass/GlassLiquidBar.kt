@@ -69,9 +69,12 @@ fun GlassLiquidBar(
                                 )
                             }
                         },
-                        highlight = { Highlight.Default },
+                        // [GLASS] 顶栏是"贴边的渐变模糊"，不是独立的玻璃块：
+                        // 高光/内阴影是给 FAB、菜单、卡片那种"浮起来的玻璃"用的。
+                        // 顶栏加高光会看到一条假边线（主人指出的问题）。
+                        highlight = null,
                         shadow = null,
-                        innerShadow = { InnerShadow.Default },
+                        innerShadow = null,
                         onDrawSurface = {
                             drawRect(
                                 if (dark) Color.Black.copy(alpha = 0.10f)

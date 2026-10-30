@@ -7,7 +7,6 @@ import app.minis.glass.internal.RuntimeShaderEffect
 import app.minis.glass.internal.chain
 import app.minis.glass.isRenderEffectSupported
 import app.minis.glass.isRuntimeShaderSupported
-import org.intellij.lang.annotations.Language
 import kotlin.contracts.ExperimentalContracts
 
 fun BackdropEffectScope.effect(effect: RenderEffect) {
@@ -19,7 +18,7 @@ fun BackdropEffectScope.effect(effect: RenderEffect) {
 @OptIn(ExperimentalContracts::class)
 fun BackdropEffectScope.runtimeShaderEffect(
     key: String,
-    @Language("AGSL") shaderString: String,
+    shaderString: String,
     uniformShaderName: String,
     block: RuntimeShader.() -> Unit
 ) {

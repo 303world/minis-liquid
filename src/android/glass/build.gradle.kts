@@ -52,6 +52,4 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.annotation:annotation:1.9.1")
-    // @Language("AGSL") 只是 IDE 提示注解，上游同样依赖它
-    compileOnly("org.jetbrains:annotations:26.1.0")
 }

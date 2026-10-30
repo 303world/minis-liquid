@@ -1,10 +1,9 @@
 package app.minis.glass
 
-import org.intellij.lang.annotations.Language
 
 sealed interface RuntimeShaderCache {
 
-    fun obtainRuntimeShader(key: String, @Language("AGSL") string: String): RuntimeShader
+    fun obtainRuntimeShader(key: String, string: String): RuntimeShader
 }
 
 internal class RuntimeShaderCacheImpl : RuntimeShaderCache {

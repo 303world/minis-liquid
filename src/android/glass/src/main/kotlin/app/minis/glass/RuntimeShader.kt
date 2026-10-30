@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.toArgb
-import org.intellij.lang.annotations.Language
 
 /**
  * [GLASS] AGSL（Android Graphics Shading Language）运行时着色器的统一门面。
@@ -32,7 +31,7 @@ interface RuntimeShader {
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-fun RuntimeShader(@Language("AGSL") shaderString: String): RuntimeShader {
+fun RuntimeShader(shaderString: String): RuntimeShader {
     val shader = android.graphics.RuntimeShader(shaderString)
     return AndroidRuntimeShader(shader)
 }

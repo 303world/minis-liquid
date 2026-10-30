@@ -5449,6 +5449,9 @@ fun ChatScreen(
                     // from the backdrop by a symmetric soft shadow painted by hand
                     // (Android's Modifier.shadow only casts downward).
                     val inputBgArgb = ChatColors.inputBg.toArgb()
+                    // [GLASS] ChatColors.isDark 是 @Composable 属性，只能在这里读；
+                    // 绘制回调用这个局部值。
+                    val composerGlassDark = ChatColors.isDark
                     val shadowPaint = remember(inputBgArgb) {
                         android.graphics.Paint().apply {
                             // [GLASS] 只画阴影，不画底色 —— 底色由 GlassSurface 提供
@@ -5582,7 +5585,7 @@ fun ChatScreen(
                                 },
                                 onDrawSurface = {
                                     drawRect(
-                                        if (com.openminis.app.ui.theme.ChatColors.isDark) {
+                                        if (composerGlassDark) {
                                             Color.Black.copy(alpha = 0.12f)
                                         } else {
                                             Color.White.copy(alpha = 0.14f)

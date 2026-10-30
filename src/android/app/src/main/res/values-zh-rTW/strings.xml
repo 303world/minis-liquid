@@ -316,7 +316,7 @@
     <string name="settings_feedback_telegram">意見回饋（Telegram）</string>
     <string name="settings_feedback_email">意見回饋（電子郵件）</string>
     <string name="about_title">關於</string>
-    <string name="about_minis_tagline">Minis 是住在你裝置上的 AI Agent。你的金鑰和檔案留在本機；對話只會傳送給你選擇的 AI 服務商。</string>
+    <string name="about_minis_tagline">这是基于 OpenMinis 的开源分支，旨在把原版 Material 3 风格更新为更现代的设计风格（液态玻璃）。</string>
     <string name="about_links">連結</string>
     <string name="about_github_repository">GitHub 儲存庫</string>
     <string name="about_version_format">版本 %1$s（build %2$s）</string>

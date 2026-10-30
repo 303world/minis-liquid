@@ -2548,7 +2548,11 @@ private fun folderEdgeColor(): Color =
     else Color.Black.copy(alpha = 0.08f)
 
 @Composable
-private fun folderFillColor(): Color = MaterialTheme.colorScheme.surfaceContainerLow
+// [GLASS] 文件夹卡：背景是纯色，这里用"轻量玻璃"——半透明底 + 发丝边，
+// 不采样、不模糊（省性能），但既有层次又不发死板。
+@Composable
+private fun folderFillColor(): Color =
+    if (ChatColors.isDark) Color.White.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.72f)
 
 private fun Modifier.folderSurface(
     segment: FolderSegment,
@@ -3818,7 +3822,11 @@ internal fun SessionEditSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        // [GLASS] 编辑会话面板：半透明容器 + 系统背景模糊
+        containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
+        com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
         Column(
             modifier = Modifier
                 .fillMaxWidth()

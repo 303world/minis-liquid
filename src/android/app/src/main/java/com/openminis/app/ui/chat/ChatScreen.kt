@@ -5578,6 +5578,10 @@ fun ChatScreen(
                             .drawBackdrop(
                                 backdrop = composerBackdrop,
                                 shape = { androidx.compose.foundation.shape.RoundedCornerShape(20.dp) },
+                                // [GLASS] 采样区上移：输入卡脚下的区域常常是空的（列表内容让位），
+                                // 直接采样只会糊到一片底色。把采样窗口往上移，采到的就是
+                                // 紧贴它上方的消息内容 —— 视觉上等同于"内容从玻璃后流过"。
+                                layerBlock = { translationY = -120f },
                                 effects = {
                                     vibrancy()
                                     blur(18.dp.toPx())          // 加大模糊，输入卡才看得出"透过玻璃"

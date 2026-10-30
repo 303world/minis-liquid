@@ -22,8 +22,6 @@ import androidx.compose.ui.platform.LocalView
  *  - 部分机型（省电模式、低端机）会忽略这个请求，所以调用方必须同时画好
  *    "没有模糊也不会难看"的底色（见 GlassSurface 的退化路径）。
  */
-fun Modifier.windowBackgroundBlur(radiusPx: Int = 48): Modifier = this
-
 @Composable
 fun ApplyWindowBackgroundBlur(radiusPx: Int = 48) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return

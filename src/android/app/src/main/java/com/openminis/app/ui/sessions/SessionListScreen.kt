@@ -105,6 +105,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
 import app.minis.glass.GlassLiquidBar
+import app.minis.glass.backdrops.layerBackdrop
+import app.minis.glass.GlassSurface
+import app.minis.glass.LocalGlassBackdrop
 import app.minis.glass.token.GlassTokens
 import com.openminis.app.ui.glass.GlassWallpaper
 import com.openminis.app.ui.glass.MinisGlassHost
@@ -981,6 +984,9 @@ fun SessionListScreen(
         MinisGlassHost(
             modifier = Modifier.fillMaxSize(),
             content = {
+            // [GLASS] 局部 backdrop：FAB 浮在列表上方，需要采样"背后的列表"，
+            // 不能用页面级的 backdrop（那份里包含 FAB 自己，会糊到自己）。
+            val fabBackdrop = app.minis.glass.backdrops.rememberLayerBackdrop()
             // [GLASS] 极淡层叠渐变：给玻璃提供可采样的色温，肉眼几乎看不出它是渐变。
             GlassWallpaper()
             Box(
@@ -1041,7 +1047,8 @@ fun SessionListScreen(
                             // [T-android-newchat-list-autoscroll] Hoisted state so
                             // the new-session autoscroll effect above can drive it.
                             state = listState,
-                            modifier = Modifier.fillMaxSize(),
+                            // [GLASS] 录进局部 backdrop，供下方 FAB 采样
+                            modifier = Modifier.fillMaxSize().layerBackdrop(fabBackdrop),
                             // Leave space for bottom FAB row
                             // [GLASS] 顶部留出玻璃顶栏的高度：列表首项不被遮住，滚动时又能从玻璃下面穿过去。
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -1447,6 +1454,7 @@ fun SessionListScreen(
                             viewModel.isSearchActive.value = false
                         },
                         modifier = Modifier.align(Alignment.BottomCenter),
+                        backdrop = fabBackdrop,   // [GLASS] 让 FAB 采样背后的列表
                     )
                 }
             }
@@ -1853,6 +1861,8 @@ private fun DualFabRow(
     onSearchQueryChange: (String) -> Unit,
     onSearchDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    /** [GLASS] FAB 采样用的局部 backdrop（列表内容）。 */
+    backdrop: app.minis.glass.Backdrop? = null,
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("ui_prefs", Context.MODE_PRIVATE) }
@@ -1907,10 +1917,13 @@ private fun DualFabRow(
                     )
                 },
         ) {
-            FloatingActionButton(
-                onClick = onNewChat,
+            // [GLASS] 新建会话 FAB → 液态玻璃圆钮（品牌沙 tint，对齐 iOS 的 FAB）
+            androidx.compose.runtime.CompositionLocalProvider(
+                LocalGlassBackdrop provides backdrop,
+            ) {
+            GlassSurface(
+                level = GlassTokens.Button.copy(tint = GlassTokens.BrandSand),
                 shape = CircleShape,
-                containerColor = minisFabColor(),
                 modifier = Modifier
                     .size(56.dp)
                     // [T-newchat-fab-shadow] The shadow goes FIRST, outside the clip
@@ -1935,9 +1948,11 @@ private fun DualFabRow(
                             if (topGroups.isNotEmpty()) showGroupMenu = true
                         },
                     ),
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
             ) {
-                Icon(Icons.Outlined.Forum, contentDescription = "New Chat", tint = Color.White, modifier = Modifier.size(24.dp))
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.Forum, contentDescription = "New Chat", tint = Color.White, modifier = Modifier.size(24.dp))
+                }
+            }
             }
             DropdownMenu(
                 expanded = showGroupMenu,
@@ -1964,12 +1979,13 @@ private fun DualFabRow(
                 enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.85f),
                 exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.85f),
             ) {
-                FloatingActionButton(
-                    onClick = onSearchToggle,
+                // [GLASS] 搜索 FAB → 液态玻璃圆钮
+                androidx.compose.runtime.CompositionLocalProvider(
+                    LocalGlassBackdrop provides backdrop,
+                ) {
+                GlassSurface(
+                    level = GlassTokens.Button,
                     shape = CircleShape,
-                    // iOS: UIColor.secondarySystemBackground = #F2F2F7 (light) / #1C1C1E (dark).
-                    // ChatColors.secondaryBg already matches these values across themes.
-                    containerColor = ChatColors.secondaryBg,
                     modifier = Modifier
                         .size(56.dp)
                         .offset { IntOffset(searchDragX.roundToInt(), 0) }
@@ -1987,9 +2003,12 @@ private fun DualFabRow(
                             )
                         }
                         .shadow(6.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.15f)),
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+                    .clickable(onClick = onSearchToggle),
                 ) {
-                    Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.sessionlist_search_action), tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Outlined.Search, contentDescription = stringResource(R.string.sessionlist_search_action), tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
+                    }
+                }
                 }
             }
         }

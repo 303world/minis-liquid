@@ -8669,7 +8669,12 @@ private fun ThinkingLevelSheet(
         listOf(com.openminis.app.data.model.ThinkingLevel.OFF) +
             availableLevels.filter { it != com.openminis.app.data.model.ThinkingLevel.OFF }
     }
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = com.openminis.app.ui.glass.glassSheetColor(),
+    ) {
+        // [GLASS] 独立窗口：系统级背景模糊
+        com.openminis.app.ui.glass.ApplyWindowBackgroundBlur(48)
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
             Text(
                 text = stringResource(R.string.thinking_level_sheet_title),

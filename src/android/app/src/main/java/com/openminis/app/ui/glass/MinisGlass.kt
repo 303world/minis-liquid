@@ -69,3 +69,32 @@ fun MinisGlassHost(
         glass = glass,
     )
 }
+
+/**
+ * [GLASS] Sheet / 弹窗这类"独立窗口"的容器色。
+ * 独立窗口采样不到页面内容，靠 [com.openminis.app.ui.glass.ApplyWindowBackgroundBlur]
+ * 让系统在窗口后面做实时模糊，这里只给一层半透明色 + 发丝边。
+ * 浅色别用太实的白（会把背后模糊全盖住，看起来就是一块白板）。
+ */
+@Composable
+fun glassSheetColor(): androidx.compose.ui.graphics.Color =
+    if (ChatColors.isDark) androidx.compose.ui.graphics.Color(0xE61C1C1E)
+    else androidx.compose.ui.graphics.Color(0xB8FFFFFF)
+
+@Composable
+fun glassSheetBorder(): androidx.compose.foundation.BorderStroke =
+    if (ChatColors.isDark) {
+        androidx.compose.foundation.BorderStroke(
+            0.5.dp,
+            androidx.compose.ui.graphics.Brush.verticalGradient(
+                listOf(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.22f), androidx.compose.ui.graphics.Color.White.copy(alpha = 0.05f)),
+            ),
+        )
+    } else {
+        androidx.compose.foundation.BorderStroke(
+            0.5.dp,
+            androidx.compose.ui.graphics.Brush.verticalGradient(
+                listOf(androidx.compose.ui.graphics.Color.White, androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.06f)),
+            ),
+        )
+    }

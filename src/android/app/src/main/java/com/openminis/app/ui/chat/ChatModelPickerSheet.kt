@@ -166,6 +166,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import com.openminis.app.ui.glass.ApplyWindowBackgroundBlur
+import com.openminis.app.ui.glass.glassSheetColor
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -396,6 +398,8 @@ internal fun ModelPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        // [GLASS] 半透明容器 + 系统级背景模糊（窗口内采样不到页面内容）
+        containerColor = glassSheetColor(),
         // Match the slim drag handle used by StandardChatSheet (6dp top / 4dp
         // bottom) so the title sits flush with the indicator instead of the
         // Material default's ~44dp whitespace gap above it.
@@ -418,6 +422,8 @@ internal fun ModelPickerSheet(
             }
         },
     ) {
+        // [GLASS] 独立窗口：让系统在面板后面做实时模糊
+        ApplyWindowBackgroundBlur(48)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
